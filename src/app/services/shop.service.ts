@@ -12,8 +12,14 @@ export interface DirectoryStore {
 export interface NetworkItem extends PublicProduct {
   storeTint: string | null; storeTintFg: string | null; storeLogoUrl: string | null; isSample: boolean; reason: string; fulfilment: string;
 }
+/** A shop from the Find crawl that isn't on TODD Market: links out, nothing to buy here. */
+export interface Listing {
+  domain: string; name: string; url: string; category: string; region: string; city: string;
+  products: { title: string; url: string; imageUrl: string; description: string }[];
+}
+export interface ListingItem { id: string; title: string; image: string; url: string; storeName: string; storeDomain: string; storeUrl: string; category: string }
 export interface NetworkResult {
-  query: string; bestId: string | null; note: string; items: NetworkItem[];
+  query: string; bestId: string | null; note: string; items: NetworkItem[]; listingItems?: ListingItem[];
   stores: ( DirectoryStore & { matches: number } )[]; storesSearched: number; ms: number;
 }
 
@@ -27,7 +33,7 @@ export class ShopService {
   private readonly isBrowser = isPlatformBrowser( inject( PLATFORM_ID ) );
   private hostStore: Promise<{ slug: string; name: string } | null> | null = null;
 
-  stores (): Promise<{ stores: DirectoryStore[]; categories: string[] }> {
+  stores (): Promise<{ stores: DirectoryStore[]; listings: Listing[]; categories: string[] }> {
     return this.api.get( '/stores' );
   }
 

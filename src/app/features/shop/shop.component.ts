@@ -6,7 +6,7 @@ import { BagService } from '../../services/bag.service';
 import { apiErrorMessage } from '../../services/market-api.service';
 import { MarketAuthService } from '../../services/market-auth.service';
 import { SeoService } from '../../services/seo.service';
-import { DirectoryStore, NetworkItem, NetworkResult, ShopService } from '../../services/shop.service';
+import { DirectoryStore, Listing, NetworkItem, NetworkResult, ShopService } from '../../services/shop.service';
 import { IconComponent } from '../../shared/icon/icon.component';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.component';
@@ -49,6 +49,9 @@ export class ShopComponent implements OnInit {
   readonly layout = signal<'item' | 'store'>( 'item' );
   readonly storeFilter = signal<string | null>( null );
   readonly stores = signal<DirectoryStore[]>( [] );
+  readonly listings = signal<Listing[]>( [] );
+  readonly listingsShown = signal( 12 );
+  readonly filteredListings = computed( () => this.listings().filter( ( l ) => this.category() === 'All' || l.category === this.category() ) );
   readonly categories = signal<string[]>( [] );
   readonly category = signal( 'All' );
   readonly shown = signal( PAGE );
@@ -115,6 +118,10 @@ export class ShopComponent implements OnInit {
     return s.customDomain ? `https://${ s.customDomain }` : `/${ s.slug }`;
   }
 
+  claimHref ( domain: string ): string {
+    return `mailto:support@taliferro.tech?subject=${ encodeURIComponent( `TODD Market listing: ${ domain }` ) }&body=${ encodeURIComponent( `I run ${ domain } and would like to claim / remove this listing.` ) }`;
+  }
+
   initial ( name: string ): string {
     return name.charAt( 0 ).toUpperCase();
   }
@@ -122,8 +129,9 @@ export class ShopComponent implements OnInit {
   private async loadStores (): Promise<void> {
     this.loadingStores.set( true );
     try {
-      const { stores, categories } = await this.shop.stores();
+      const { stores, listings, categories } = await this.shop.stores();
       this.stores.set( stores );
+      this.listings.set( listings || [] );
       this.categories.set( categories );
     } catch {
       this.stores.set( [] );

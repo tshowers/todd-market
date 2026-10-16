@@ -84,10 +84,40 @@
               }
             </div>
           }
+          @if (r.listingItems?.length) {
+            <section class="more">
+              <div class="more-head"><strong>More from local shops</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
+              <div class="litems">
+                @for (l of r.listingItems; track l.id) {
+                  <a class="litem" [href]="l.url" target="_blank" rel="noopener nofollow">
+                    <span class="lthumb"><img [src]="l.image" alt="" loading="lazy"></span>
+                    <span class="lstore">{{ l.storeName }}</span>
+                    <strong>{{ l.title }}</strong>
+                    <span class="lgo">Shop on their site ↗</span>
+                  </a>
+                }
+              </div>
+            </section>
+          }
           <p class="foot-note"><span>Each store sets its own prices, ships its own items and handles its own returns. Items from several stores can go in one bag with one checkout.</span><span>Bag · {{ bag.count() }}</span></p>
         } @else {
           <h1 class="h2">Nothing in the network matches “{{ r.query }}” yet.</h1>
           <p class="note">Try fewer words, or browse the store directory.</p>
+          @if (r.listingItems?.length) {
+            <section class="more">
+              <div class="more-head"><strong>Local shops that may have it</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
+              <div class="litems">
+                @for (l of r.listingItems; track l.id) {
+                  <a class="litem" [href]="l.url" target="_blank" rel="noopener nofollow">
+                    <span class="lthumb"><img [src]="l.image" alt="" loading="lazy"></span>
+                    <span class="lstore">{{ l.storeName }}</span>
+                    <strong>{{ l.title }}</strong>
+                    <span class="lgo">Shop on their site ↗</span>
+                  </a>
+                }
+              </div>
+            </section>
+          }
         }
       } @else {
         <h1 class="h1">What are you looking for?</h1>
@@ -123,6 +153,25 @@
       @if (filteredStores().length > shown()) { <button type="button" class="tm-btn tm-btn--lg more" (click)="shown.set(shown() + 24)">Show more stores</button> }
     } @else if (!loadingStores()) {
       <div class="none">No stores in this category yet. <button type="button" class="link" (click)="setView('search')">Try searching every store instead.</button></div>
+    }
+    @if (filteredListings().length) {
+      <section class="more">
+        <div class="more-head"><strong>More local shops</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
+        <div class="listings">
+          @for (l of filteredListings().slice(0, listingsShown()); track l.domain) {
+            <article class="listing">
+              <div class="lpics">@for (p of l.products.slice(0, 3); track p.url) { <img [src]="p.imageUrl" alt="" loading="lazy"> }</div>
+              <div class="lbody">
+                <strong>{{ l.name }}</strong>
+                <span class="meta">{{ l.category }}{{ l.city ? ' · ' + l.city : '' }}</span>
+                <a class="tm-btn visit" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their website ↗</a>
+                <a class="claim" [href]="claimHref(l.domain)">Is this your business?</a>
+              </div>
+            </article>
+          }
+        </div>
+        @if (filteredListings().length > listingsShown()) { <button type="button" class="tm-btn more-btn" (click)="listingsShown.set(listingsShown() + 24)">Show more shops</button> }
+      </section>
     }
     <section class="have">
       <div><strong>Have a store?</strong><span>Join the network and get shoppers other stores can't serve.</span></div>
