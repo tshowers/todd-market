@@ -1,6 +1,6 @@
 {
   "name": "market",
-  "version": "2026.10.16-build.0",
+  "version": "2026.10.16-build.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
