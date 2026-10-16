@@ -6,10 +6,10 @@ export const environment = {
   /** Same origin: firebase.json rewrites /api/** to the marketApi function (proxy.conf.json in dev). */
   apiBase: '/api',
   VERSION: String( packageJson.version || '' ),
-  /** Replace with the live publishable key before launch (Stripe Dashboard → Developers → API keys). */
+  /** Taliferro Tech platform account (acct_1Lcw5wDNMbtry5hW). Dev builds keep a placeholder: they run against the fake Stripe. */
   /** Dev only (environment.devauth.ts): sign in as this uid against market/dev/server.js. Always empty in real builds. */
   devAuthUid: '',
-  stripePublishableKey: 'pk_test_REPLACE_ME',
+  stripePublishableKey: 'pk_live_51Lcw5wDNMbtry5hWTRFBeBWYfW1XMz701tXdYOoUrgwm42YnQs0x2cSv8VFTMm33IIpiS787o6knKAihfZXO4xQl00sVyXvbUz',
   firebaseConfig: {
     apiKey: 'AIzaSyApZSnHn8Pd2fI_0oSod0Sv9O_JsOoniBc',
     authDomain: 'taliferrotech.firebaseapp.com',
