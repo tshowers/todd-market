@@ -17,7 +17,7 @@ import { storeAddress } from '../../../shared/store-address';
         <div class="live"><span class="tm-dot"></span>Live</div>
         <h1 class="tm-h1">{{ s.name }} is open.</h1>
         <div class="cards">
-          <div class="card"><span class="tm-label">Store</span><a [routerLink]="['/s', s.slug]" class="url">{{ address() }}</a></div>
+          <div class="card"><span class="tm-label">Store</span><a [routerLink]="['/', s.slug]" class="url">{{ address() }}</a></div>
           <div class="card"><span class="tm-label">Shopping agents</span><span>{{ s.stats.productCount.toLocaleString() }} products, prices, stock and policies readable</span></div>
           <div class="card"><span class="tm-label">Network</span><span>{{ s.stats.networkCount }} nearby store{{ s.stats.networkCount === 1 ? '' : 's' }} can send you shoppers</span></div>
           <div class="card">
@@ -28,7 +28,7 @@ import { storeAddress } from '../../../shared/store-address';
           </div>
         </div>
         <div class="actions">
-          <a class="tm-btn tm-btn--primary go" [routerLink]="['/s', s.slug]">View storefront</a>
+          <a class="tm-btn tm-btn--primary go" [routerLink]="['/', s.slug]">View storefront</a>
           <a class="tm-btn" routerLink="/app/dashboard">Referral settings</a>
         </div>
       </section>
@@ -48,7 +48,7 @@ import { storeAddress } from '../../../shared/store-address';
 export class LiveComponent implements OnInit {
   private readonly merchant = inject( MerchantService );
   readonly store = signal<MerchantStore | null>( null );
-  readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug ) : '' );
+  readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug, this.store()!.customDomain ) : '' );
 
   async ngOnInit (): Promise<void> {
     this.store.set( await this.merchant.load() );

@@ -35,7 +35,7 @@ import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.
             <a routerLink="/app/dashboard" [class.on]="section() === 'dashboard'">Referrals</a>
             <a routerLink="/app/orders" [class.on]="section() === 'orders'">Orders</a>
             <a routerLink="/app/settings" [class.on]="section() === 'settings'">Settings</a>
-            <a [routerLink]="['/s', merchant.store()!.slug]">View store</a>
+            <a [routerLink]="['/', merchant.store()!.slug]">View store</a>
           </nav>
         }
         <app-platform-menu [isLoggedIn]="auth.isSignedIn()" [userName]="auth.user()?.displayName || ''"

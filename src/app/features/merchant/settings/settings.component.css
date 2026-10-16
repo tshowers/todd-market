@@ -51,3 +51,15 @@
   .grid2 { grid-template-columns: minmax(0, 1fr); }
   .rate { grid-template-columns: 1fr 1fr; }
 }
+
+.domain { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 16px; background: var(--bg); font-size: 14px; }
+.dom-row { display: flex; align-items: center; gap: 10px; }
+.dom-add { display: flex; gap: 8px; }
+.dom-add .tm-input { background: var(--surface); }
+.dom-actions { display: flex; gap: 8px; }
+.records { display: flex; flex-direction: column; border-radius: 12px; background: var(--surface); padding: 6px 12px; font-size: 13px; }
+.rec { display: grid; grid-template-columns: 70px minmax(0, 1fr) minmax(0, 1.3fr); gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--surface2); }
+.rec:last-child { border-bottom: 0; }
+.rec.head { font-weight: 700; color: var(--muted); }
+.rec code { overflow-wrap: anywhere; font-size: 12px; }
+select.tm-input { appearance: auto; }

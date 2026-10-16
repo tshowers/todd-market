@@ -37,7 +37,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
         }
         @if (bag.count()) {
           <div class="total"><span>Total</span><strong>{{ bag.totalCents() | money: true }}</strong></div>
-          <a class="tm-btn tm-btn--primary tm-btn--block" [routerLink]="['/s', storeSlug(), 'checkout']" (click)="bag.open.set(false)">Check out</a>
+          <a class="tm-btn tm-btn--primary tm-btn--block" [routerLink]="['/', storeSlug(), 'checkout']" (click)="bag.open.set(false)">Check out</a>
           <p class="note">{{ bag.groups().length > 1 ? 'One checkout. Each store charges and ships its own items.' : 'Ships from ' + bag.groups()[0].storeName + '.' }}</p>
         }
       </aside>

@@ -43,7 +43,7 @@ export class GetPaidComponent implements OnInit {
     return s ? s.heroLines[s.voice] || '' : '';
   } );
   readonly collections = computed( () => ( this.review()?.collections || [] ).filter( ( c ) => c.enabled ).slice( 0, 6 ).map( ( c ) => c.name ) );
-  readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug ) : '' );
+  readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug, this.store()!.customDomain ) : '' );
 
   async ngOnInit (): Promise<void> {
     const params = this.route.snapshot.queryParamMap;

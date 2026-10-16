@@ -106,6 +106,14 @@
           </div>
           <p class="muted">Stores that send you shoppers earn {{ d.controls.offeredRatePct }}% when they buy.</p>
         </div>
+        <div class="block">
+          <span class="tm-h4">Shop stores and Search</span>
+          <div class="seg col">
+            <button type="button" [class.on]="d.controls.networkSearch !== false" (click)="setNetworkSearch(true)">Show my store and products</button>
+            <button type="button" [class.on]="d.controls.networkSearch === false" (click)="setNetworkSearch(false)">Hide them</button>
+          </div>
+          <p class="muted">Separate from referrals: whether shoppers can find you on the TODD Market home page and in Find.</p>
+        </div>
         @if (error()) { <p class="tm-error" role="alert">{{ error() }}</p> }
       </aside>
     </div>

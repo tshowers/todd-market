@@ -1,11 +1,13 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
+// "/" is the shopper home (Search all stores); "/sell" the merchant landing.
 // Public pages are built ahead of time as static HTML for search engines
 // (taliferro-ui/PRODUCT-STANDARD.md, part 4). MarketAuthService treats "no
 // browser" as signed out. Everything else (the merchant app, stores,
 // checkout, account) renders in the browser.
 export const serverRoutes: ServerRoute[] = [
   { path: '', renderMode: RenderMode.Prerender },
+  { path: 'sell', renderMode: RenderMode.Prerender },
   { path: 'about', renderMode: RenderMode.Prerender },
   { path: 'help', renderMode: RenderMode.Prerender },
   { path: 'pricing', renderMode: RenderMode.Prerender },

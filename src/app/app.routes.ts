@@ -3,7 +3,12 @@ import { Routes } from '@angular/router';
 import { signedInGuard } from './services/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', loadComponent: () => import( './features/landing/landing.component' ).then( ( m ) => m.LandingComponent ) },
+  // Shoppers: "/" is Search all stores, toggled with the Store directory
+  // (or, on a store's own domain, that store). Merchants: /sell.
+  { path: '', pathMatch: 'full', loadComponent: () => import( './features/root/root.component' ).then( ( m ) => m.RootComponent ) },
+  { path: 'stores', data: { view: 'stores' }, loadComponent: () => import( './features/shop/shop.component' ).then( ( m ) => m.ShopComponent ) },
+  { path: 'search', loadComponent: () => import( './features/shop/shop.component' ).then( ( m ) => m.ShopComponent ) },
+  { path: 'sell', loadComponent: () => import( './features/landing/landing.component' ).then( ( m ) => m.LandingComponent ) },
   { path: 'about', loadComponent: () => import( './features/about/about.component' ).then( ( m ) => m.AboutComponent ) },
   { path: 'help', loadComponent: () => import( './features/help/help.component' ).then( ( m ) => m.HelpComponent ) },
   { path: 'pricing', loadComponent: () => import( './features/pricing/pricing.component' ).then( ( m ) => m.PricingComponent ) },
@@ -47,8 +52,12 @@ export const routes: Routes = [
       } ) ),
     ],
   },
-  { path: 's/:slug/checkout', loadComponent: () => import( './features/checkout/checkout.component' ).then( ( m ) => m.CheckoutComponent ) },
   { path: 'order/:id', loadComponent: () => import( './features/checkout/order-confirmation.component' ).then( ( m ) => m.OrderConfirmationComponent ) },
-  { path: 's/:slug', loadComponent: () => import( './features/storefront/store.component' ).then( ( m ) => m.StoreComponent ) },
+  // Old store links (/s/<slug>) keep working.
+  { path: 's/:slug/checkout', redirectTo: ':slug/checkout' },
+  { path: 's/:slug', redirectTo: ':slug' },
+  // Stores live at /<slug>; every named path above is reserved (RESERVED_SLUGS in the backend).
+  { path: ':slug/checkout', loadComponent: () => import( './features/checkout/checkout.component' ).then( ( m ) => m.CheckoutComponent ) },
+  { path: ':slug', loadComponent: () => import( './features/storefront/store.component' ).then( ( m ) => m.StoreComponent ) },
   { path: '**', loadComponent: () => import( './features/not-found/not-found.component' ).then( ( m ) => m.NotFoundComponent ) },
 ];

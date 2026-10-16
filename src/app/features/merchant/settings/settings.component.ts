@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { MerchantStore, ShippingRate, StoreSettings } from '../../../models/merchant.model';
+import { CustomDomain, MerchantStore, ShippingRate, StoreSettings } from '../../../models/merchant.model';
 import { apiErrorMessage } from '../../../services/market-api.service';
 import { MerchantService, TaxRegistration } from '../../../services/merchant.service';
 import { MoneyPipe } from '../../../shared/money.pipe';
 import { policySentence } from '../../../shared/return-policy';
 
 type Tab = 'store' | 'returns' | 'tax' | 'shipping';
-interface Draft { name: string; slug: string; settings: StoreSettings }
+interface Draft { name: string; slug: string; directoryCategory: string; settings: StoreSettings }
 
 const US_STATES: [string, string][] = Object.entries( {
   AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
@@ -41,6 +41,10 @@ export class SettingsComponent implements OnInit {
   readonly draft = signal<Draft | null>( null );
   readonly categories = signal<string[]>( [] );
   readonly taxStates = signal<TaxRegistration[]>( [] );
+  readonly directoryCategories = signal<string[]>( [] );
+  readonly domain = signal<CustomDomain | null>( null );
+  readonly domainInput = signal( '' );
+  readonly domainBusy = signal( false );
   readonly addingState = signal( '' );
   readonly saving = signal( false );
   readonly savedNote = signal( false );
@@ -56,8 +60,10 @@ export class SettingsComponent implements OnInit {
       this.tab.set( this.tabs.some( ( t ) => t.key === tab ) ? tab : 'store' );
     } );
     try {
-      const { store, taxRegistrations } = await this.merchant.settings();
+      const { store, taxRegistrations, categories } = await this.merchant.settings();
       this.reset( store );
+      this.directoryCategories.set( categories );
+      this.domain.set( store.customDomain );
       this.taxStates.set( taxRegistrations );
       const review = await this.merchant.review().catch( () => null );
       this.categories.set( ( review?.collections || [] ).map( ( c ) => c.name ) );
@@ -75,7 +81,7 @@ export class SettingsComponent implements OnInit {
     this.savedNote.set( false );
   }
 
-  setTop ( key: 'name' | 'slug', value: string ): void {
+  setTop ( key: 'name' | 'slug' | 'directoryCategory', value: string ): void {
     this.draft.update( ( d ) => d ? { ...d, [key]: value } : d );
     this.savedNote.set( false );
   }
@@ -127,7 +133,7 @@ export class SettingsComponent implements OnInit {
     this.saving.set( true );
     this.error.set( '' );
     try {
-      const { store } = await this.merchant.saveSettings( { name: d.name, slug: d.slug, ...d.settings } );
+      const { store } = await this.merchant.saveSettings( { name: d.name, slug: d.slug, directoryCategory: d.directoryCategory, ...d.settings } );
       this.reset( store );
       this.savedNote.set( true );
     } catch ( error ) {
@@ -151,9 +157,45 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  async connectDomain (): Promise<void> {
+    this.domainBusy.set( true );
+    this.error.set( '' );
+    try {
+      this.domain.set( ( await this.merchant.connectDomain( this.domainInput() ) ).customDomain );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error, "We couldn't connect that domain." ) );
+    } finally {
+      this.domainBusy.set( false );
+    }
+  }
+
+  async checkDomain (): Promise<void> {
+    this.domainBusy.set( true );
+    try {
+      this.domain.set( ( await this.merchant.checkDomain() ).customDomain );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    } finally {
+      this.domainBusy.set( false );
+    }
+  }
+
+  async disconnectDomain (): Promise<void> {
+    if ( typeof window !== 'undefined' && !window.confirm( `Disconnect ${ this.domain()?.name }? Your store stays at market.taliferro.tech/${ this.draft()?.slug }.` ) ) return;
+    this.domainBusy.set( true );
+    try {
+      await this.merchant.disconnectDomain();
+      this.domain.set( null );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    } finally {
+      this.domainBusy.set( false );
+    }
+  }
+
   private reset ( store: MerchantStore ): void {
     this.store.set( store );
-    const draft: Draft = { name: store.name, slug: store.slug, settings: JSON.parse( JSON.stringify( store.settings ) ) };
+    const draft: Draft = { name: store.name, slug: store.slug, directoryCategory: store.directoryCategory, settings: JSON.parse( JSON.stringify( store.settings ) ) };
     this.saved.set( JSON.stringify( draft ) );
     this.draft.set( draft );
   }

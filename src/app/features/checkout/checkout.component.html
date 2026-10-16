@@ -1,14 +1,14 @@
 <div class="page tm-branded" [style]="style()">
   <header class="top">
     @if (store(); as s) {
-      <a class="brand" [routerLink]="['/s', s.slug]"><span class="tm-store-mark mark">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ s.name.charAt(0) }} }</span>{{ s.name }}</a>
+      <a class="brand" [routerLink]="['/', s.slug]"><span class="tm-store-mark mark">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ s.name.charAt(0) }} }</span>{{ s.name }}</a>
     }
   </header>
 
   <div class="title"><h1>Checkout</h1>@if (storeCount() > 1) { <span class="tm-tag tm-tint-cyan">{{ storeCount() }} stores · 1 checkout</span> }</div>
 
   @if (!bag.count()) {
-    <p class="empty">Your bag is empty. @if (store(); as s) { <a [routerLink]="['/s', s.slug]">Keep shopping</a> }</p>
+    <p class="empty">Your bag is empty. @if (store(); as s) { <a [routerLink]="['/', s.slug]">Keep shopping</a> }</p>
   } @else {
     <div class="grid">
       <div class="col">

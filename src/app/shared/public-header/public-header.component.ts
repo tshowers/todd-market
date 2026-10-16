@@ -5,7 +5,7 @@ import { MarketAuthService } from '../../services/market-auth.service';
 import { PlatformMenuComponent } from '../platform-menu/platform-menu.component';
 import { RingIconComponent } from '../ring-icon/ring-icon.component';
 
-export type PublicNavKey = 'how' | 'pricing' | 'ios' | 'help' | 'about' | '';
+export type PublicNavKey = 'how' | 'shop' | 'pricing' | 'ios' | 'help' | 'about' | '';
 
 /**
  * The top bar on TODD Market's own pages (Landing, About, Help, Pricing,
@@ -20,12 +20,13 @@ export type PublicNavKey = 'how' | 'pricing' | 'ios' | 'help' | 'about' | '';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="bar">
-      <a class="brand" routerLink="/" aria-label="TODD Market home">
+      <a class="brand" routerLink="/sell" aria-label="TODD Market for stores">
         <span class="mark"><tm-ring-icon [size]="24" /></span>
         <span class="word">TODD <span>Market</span></span>
       </a>
       <nav class="pills" aria-label="TODD Market">
-        <a routerLink="/" fragment="how-it-works" [class.on]="active() === 'how'">How it works</a>
+        <a routerLink="/sell" fragment="how-it-works" [class.on]="active() === 'how'">How it works</a>
+        <a routerLink="/" [class.on]="active() === 'shop'">Shop stores</a>
         <a routerLink="/pricing" [class.on]="active() === 'pricing'">Pricing</a>
         <a routerLink="/ios" [class.on]="active() === 'ios'">iPhone</a>
         <a routerLink="/help" [class.on]="active() === 'help'">Help</a>

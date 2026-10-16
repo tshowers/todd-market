@@ -40,7 +40,7 @@ const STAGE_INDEX: Record<string, number> = { received: 0, preparing: 1, shipped
         </div>
         <div class="actions">
           @if (auth.isSignedIn()) { <a class="tm-btn tm-btn--primary tm-btn--lg" [routerLink]="['/account/orders', o.id]">View order</a> }
-          <a class="tm-btn tm-btn--lg" [routerLink]="['/s', o.parts[0].storeSlug]">Keep shopping</a>
+          <a class="tm-btn tm-btn--lg" [routerLink]="['/', o.parts[0].storeSlug]">Keep shopping</a>
         </div>
       } @else if (error()) {
         <p class="tm-error" role="alert">{{ error() }}</p>

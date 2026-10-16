@@ -20,7 +20,7 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
       @case ('saved') {
         <h1>Saved</h1>
         @for (s of saved(); track s.storeId + s.productId) {
-          <a class="row" [routerLink]="['/s', s.storeSlug]" [queryParams]="{ product: s.productId }">@if (s.image) { <img [src]="s.image" alt=""> }<span><strong>{{ s.title }}</strong><span>{{ s.storeName }}</span></span></a>
+          <a class="row" [routerLink]="['/', s.storeSlug]" [queryParams]="{ product: s.productId }">@if (s.image) { <img [src]="s.image" alt=""> }<span><strong>{{ s.title }}</strong><span>{{ s.storeName }}</span></span></a>
         } @empty { <p class="muted">Items you save at any store show up here.</p> }
       }
       @case ('addresses') {

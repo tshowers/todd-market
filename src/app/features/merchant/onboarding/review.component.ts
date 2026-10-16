@@ -31,7 +31,7 @@ export class ReviewComponent implements OnInit {
   readonly heroLine = computed( () => this.data()?.store.heroLines[this.voice()] || '' );
   readonly liveCollections = computed( () => ( this.data()?.collections || [] ).filter( ( c ) => c.enabled ).slice( 0, 6 ).map( ( c ) => c.name ) );
   readonly openIssues = computed( () => ( this.data()?.issues || [] ).filter( ( i ) => !i.resolved ) );
-  readonly address = computed( () => this.data() ? storeAddress( this.data()!.store.slug ) : '' );
+  readonly address = computed( () => this.data() ? storeAddress( this.data()!.store.slug, this.data()!.store.customDomain ) : '' );
 
   async ngOnInit (): Promise<void> {
     try {

@@ -84,6 +84,10 @@ export class DashboardComponent implements OnInit {
     await this.ngOnInit();
   }
 
+  async setNetworkSearch ( on: boolean ): Promise<void> {
+    await this.save( { networkSearch: on } );
+  }
+
   async acceptFrom ( value: 'any' | 'approved' ): Promise<void> {
     await this.save( { acceptFrom: value } );
   }

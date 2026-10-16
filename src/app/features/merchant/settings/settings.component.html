@@ -12,7 +12,11 @@
             <label class="field"><span class="tm-label">Store name</span><input class="tm-input" [ngModel]="d.name" (ngModelChange)="setTop('name', $event)"></label>
             <label class="field"><span class="tm-label">Support email</span><input class="tm-input" type="email" [ngModel]="d.settings.store.email" (ngModelChange)="patch('store', { email: $event })"></label>
             <label class="field wide"><span class="tm-label">Web address</span>
-              <span class="addr"><span>market.taliferro.tech/s/</span><input class="tm-input" [ngModel]="d.slug" (ngModelChange)="setTop('slug', $event.toLowerCase())"></span></label>
+              <span class="addr"><span>market.taliferro.tech/</span><input class="tm-input" [ngModel]="d.slug" (ngModelChange)="setTop('slug', $event.toLowerCase())"></span></label>
+            <label class="field"><span class="tm-label">Category (Shop stores)</span>
+              <select class="tm-input" [ngModel]="d.directoryCategory" (ngModelChange)="setTop('directoryCategory', $event)">
+                @for (c of directoryCategories(); track c) { <option [value]="c">{{ c }}</option> }
+              </select></label>
             <label class="field"><span class="tm-label">Phone</span><input class="tm-input" [ngModel]="d.settings.store.phone" (ngModelChange)="patch('store', { phone: $event })"></label>
             <label class="field"><span class="tm-label">Store location (shown to shoppers)</span><input class="tm-input" placeholder="Durham, NC" [ngModel]="d.settings.store.location" (ngModelChange)="patch('store', { location: $event })"></label>
             <label class="field wide"><span class="tm-label">Street address (for sales tax)</span><input class="tm-input" [ngModel]="d.settings.store.address?.line1" (ngModelChange)="setAddress('line1', $event)"></label>
@@ -20,6 +24,30 @@
             <div class="pair">
               <label class="field"><span class="tm-label">State</span><input class="tm-input" maxlength="2" [ngModel]="d.settings.store.address?.state" (ngModelChange)="setAddress('state', $event.toUpperCase())"></label>
               <label class="field"><span class="tm-label">ZIP</span><input class="tm-input" [ngModel]="d.settings.store.address?.postal_code" (ngModelChange)="setAddress('postal_code', $event)"></label>
+            </div>
+            <div class="domain wide">
+              <strong>Your own domain</strong>
+              <span class="muted">Shoppers can reach your store at your own address, like shop.yourstore.com. Your market.taliferro.tech/{{ d.slug }} link keeps working.</span>
+              @if (domain(); as dom) {
+                <div class="dom-row"><strong>{{ dom.name }}</strong>
+                  <span class="tm-tag" [class.tm-tint-green]="dom.status === 'active'" [class.tm-tint-yellow]="dom.status !== 'active'">{{ dom.status === 'active' ? 'Connected' : 'Waiting for DNS' }}</span></div>
+                @if (dom.status !== 'active' && dom.records.length) {
+                  <span class="muted">Add these records where you manage {{ dom.name }}'s DNS (your domain registrar), then check again. Changes can take up to a few hours.</span>
+                  <div class="records">
+                    <div class="rec head"><span>Type</span><span>Name</span><span>Value</span></div>
+                    @for (r of dom.records; track r.type + r.name + r.value) { <div class="rec"><span>{{ r.type }}</span><code>{{ r.name }}</code><code>{{ r.value }}</code></div> }
+                  </div>
+                }
+                <div class="dom-actions">
+                  @if (dom.status !== 'active') { <button type="button" class="tm-btn" [disabled]="domainBusy()" (click)="checkDomain()">{{ domainBusy() ? 'Checking…' : 'Check again' }}</button> }
+                  <button type="button" class="tm-btn tm-btn--ghost" [disabled]="domainBusy()" (click)="disconnectDomain()">Disconnect</button>
+                </div>
+              } @else {
+                <div class="dom-add">
+                  <input class="tm-input" placeholder="shop.yourstore.com" [ngModel]="domainInput()" (ngModelChange)="domainInput.set($event)">
+                  <button type="button" class="tm-btn tm-btn--primary" [disabled]="domainBusy() || !domainInput()" (click)="connectDomain()">{{ domainBusy() ? 'Connecting…' : 'Connect' }}</button>
+                </div>
+              }
             </div>
             <div class="toggle-row wide"><span><strong>Offer in-store pickup</strong><span>Shoppers can choose pickup at checkout.</span></span>
               <button type="button" role="switch" class="switch" [class.on]="d.settings.store.pickup" [attr.aria-checked]="d.settings.store.pickup" (click)="togglePickup(!d.settings.store.pickup)"><span></span></button></div>

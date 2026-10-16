@@ -1,6 +1,6 @@
 /** The demo store behind "See a sample store" (seeded by functions/market/scripts/seedSampleStore.js). */
 export const SAMPLE_STORE_SLUG = 'bettys-bridal';
-export const SAMPLE_STORE_PATH = `/s/${ SAMPLE_STORE_SLUG }`;
+export const SAMPLE_STORE_PATH = `/${ SAMPLE_STORE_SLUG }`;
 
 /**
  * TODD Market's fee on each order, as a percentage of the merchandise

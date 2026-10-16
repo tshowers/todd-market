@@ -33,11 +33,16 @@ export interface MerchantStore {
     blockedStoreIds: string[];
     acceptFrom: 'any' | 'approved';
     approvedStoreIds: string[];
+    networkSearch?: boolean;
   };
+  directoryCategory: string;
+  customDomain: CustomDomain | null;
   settings: StoreSettings;
   stats: { productCount: number; photoCount: number; collectionCount: number; networkCount: number };
   stripe: { connected: boolean; chargesEnabled: boolean; payoutsEnabled: boolean; bankLast4: string | null; taxStatus: string | null };
 }
+
+export interface CustomDomain { name: string; status: 'pending' | 'active'; records: { type: string; name: string; value: string }[]; checkedAt: number }
 
 export interface ShippingRate { id: string; label: string; detail: string; priceCents: number; minDays: number; maxDays: number }
 

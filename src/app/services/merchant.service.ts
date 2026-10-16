@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { BuildJob, MerchantStore, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
+import { BuildJob, CustomDomain, MerchantStore, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
 
 export interface LedgerRow {
   id: string; direction: 'sent' | 'received'; store: string; item: string; date: number; saleCents: number; commissionCents: number;
@@ -121,11 +121,23 @@ export class MerchantService {
     return store;
   }
 
-  settings (): Promise<{ store: MerchantStore; policy: string; taxRegistrations: TaxRegistration[] }> {
+  connectDomain ( domain: string ): Promise<{ customDomain: CustomDomain }> {
+    return this.api.post( '/merchant/settings/domain', { domain } );
+  }
+
+  checkDomain (): Promise<{ customDomain: CustomDomain | null }> {
+    return this.api.get( '/merchant/settings/domain' );
+  }
+
+  disconnectDomain (): Promise<unknown> {
+    return this.api.delete( '/merchant/settings/domain' );
+  }
+
+  settings (): Promise<{ store: MerchantStore; categories: string[]; policy: string; taxRegistrations: TaxRegistration[] }> {
     return this.api.get( '/merchant/settings' );
   }
 
-  async saveSettings ( body: Partial<StoreSettings> & { name?: string; slug?: string } ): Promise<{ store: MerchantStore; policy: string }> {
+  async saveSettings ( body: Partial<StoreSettings> & { name?: string; slug?: string; directoryCategory?: string } ): Promise<{ store: MerchantStore; policy: string }> {
     const result = await this.api.put<{ store: MerchantStore; policy: string }>( '/merchant/settings', body );
     this.store.set( result.store );
     return result;

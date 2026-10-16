@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
@@ -38,6 +38,8 @@ export class StoreComponent implements OnInit {
   readonly bag = inject( BagService );
   readonly auth = inject( MarketAuthService );
 
+  /** Set when the store is shown on its own domain at "/" (RootComponent). */
+  readonly slugOverride = input<string | null>( null );
   readonly store = signal<PublicStore | null>( null );
   readonly notFound = signal( false );
   readonly query = signal( '' );
@@ -56,11 +58,11 @@ export class StoreComponent implements OnInit {
   readonly shortName = computed( () => ( this.store()?.name || '' ).split( /\s+/ )[0].replace( /[’']s$/, '' ) + "'s" );
 
   async ngOnInit (): Promise<void> {
-    const slug = this.route.snapshot.paramMap.get( 'slug' ) || '';
+    const slug = this.slugOverride() || this.route.snapshot.paramMap.get( 'slug' ) || '';
     try {
       const store = await this.api.store( slug );
       this.store.set( store );
-      this.seo.set( { title: `${ store.name } | TODD Market`, description: store.heroLine || `Shop ${ store.name } on TODD Market.`, path: `/s/${ store.slug }` } );
+      this.seo.set( { title: `${ store.name } | TODD Market`, description: store.heroLine || `Shop ${ store.name } on TODD Market.`, path: `/${ store.slug }` } );
       this.seo.setJsonLd( 'store-jsonld', {
         '@context': 'https://schema.org', '@type': 'Store', name: store.name, url: `https://${ this.address() }`,
         hasOfferCatalog: { '@type': 'OfferCatalog', url: `https://market.taliferro.tech/feeds/${ store.slug }.json` },
