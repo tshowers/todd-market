@@ -1,0 +1,65 @@
+<section class="wrap">
+  <div><h1 class="tm-h1">Last step: get paid.</h1><p class="tm-lead">Your store is built. Connect Stripe to start taking orders, then go live.</p></div>
+  @if (store(); as s) {
+    <div class="grid">
+      <tm-store-preview [name]="s.name" [address]="address()" [logoUrl]="s.brand.logoUrl" [tuned]="s.brand.tuned" [heroLine]="heroLine()" [collections]="collections()">
+        <span class="status-dot" [class.ready]="accepting()"></span>{{ accepting() ? 'Ready to go live' : 'Waiting on payments' }}
+      </tm-store-preview>
+
+      <div class="col">
+        <div class="phase">
+          <div class="phase__head">
+            <span class="num">1</span>
+            <div class="phase__title"><strong>Start accepting payments</strong><span>A few minutes · business type, contact details, what you sell</span></div>
+            <span class="tm-tag" [class.tm-tint-blue]="!accepting()" [class.tm-tint-green]="accepting()">{{ accepting() ? 'Done' : 'Needed to go live' }}</span>
+          </div>
+          @if (syncing() === 'accept') {
+            <div class="phase__body working"><span class="tm-dot tm-dot--pulse"></span>Finishing up with Stripe…</div>
+          } @else if (accepting()) {
+            <div class="phase__body checks">
+              <div><span class="check"><tm-icon name="check" [size]="12" /></span>Business details sent to Stripe</div>
+              <div><span class="check"><tm-icon name="check" [size]="12" /></span>Cards, Apple Pay and Google Pay turned on</div>
+            </div>
+          } @else {
+            <div class="phase__body">
+              <button type="button" class="tm-btn tm-btn--stripe" [disabled]="opening()" (click)="openStripe('accept')">{{ opening() ? 'Opening Stripe…' : 'Continue with Stripe' }}</button>
+              <span class="meta">Opens Stripe's secure page, then brings you back here.</span>
+            </div>
+          }
+        </div>
+
+        <div class="phase" [class.dim]="!accepting()">
+          <div class="phase__head">
+            <span class="num">2</span>
+            <div class="phase__title"><strong>Unlock payouts</strong><span>A few minutes · photo ID and a bank account</span></div>
+            <span class="tm-tag" [class.tm-tint-yellow]="!payouts()" [class.tm-tint-green]="payouts()">{{ payouts() ? 'Done' : 'Before first payout' }}</span>
+          </div>
+          @if (payouts()) {
+            <div class="phase__body checks">
+              <div><span class="check"><tm-icon name="check" [size]="12" /></span>Identity verified</div>
+              <div><span class="check"><tm-icon name="check" [size]="12" /></span>Payouts to bank account{{ s.stripe.bankLast4 ? ' ending ' + s.stripe.bankLast4 : '' }}</div>
+            </div>
+          } @else {
+            <p class="phase__copy">Stripe has to confirm who you are before it can send you money. Your sales wait in your Stripe balance until then. Do it now or after launch. We'll remind you.</p>
+            @if (syncing() === 'payouts' || checkingId()) {
+              <div class="phase__body working"><span class="tm-dot tm-dot--pulse"></span>Checking your ID… Stripe emails you if it needs anything else.</div>
+            } @else if (accepting()) {
+              <div class="phase__body"><button type="button" class="tm-btn" [disabled]="opening()" (click)="openStripe('payouts')">Verify now</button></div>
+            }
+          }
+        </div>
+
+        <p class="honest">Why this can't be skipped: the law requires anyone who takes card payments to verify their identity and business. Stripe runs the checks. TODD Market never stores your ID.</p>
+        @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
+        <div class="actions">
+          <button type="button" class="tm-btn tm-btn--primary go" [disabled]="!accepting() || busy()" (click)="goLive()">{{ busy() ? 'Opening your store…' : 'Go live' }}</button>
+          <button type="button" class="tm-btn" (click)="back()">Back to review</button>
+        </div>
+      </div>
+    </div>
+  } @else if (error()) {
+    <span class="tm-error" role="alert">{{ error() }}</span>
+  } @else {
+    <p class="meta">Loading…</p>
+  }
+</section>

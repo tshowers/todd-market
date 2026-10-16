@@ -1,0 +1,43 @@
+<tm-public-header active="help" />
+<main class="page">
+  <section class="intro">
+    <div class="kicker"><span class="tm-tag tm-tint-green">TODD Market Help</span><span>Setup · Payments · Referrals</span></div>
+    <h1>From catalog to your first referral.</h1>
+    <p class="lead">Six steps, in the order most stores take them. Each one links to the screen where you do it.</p>
+  </section>
+
+  <section class="walk">
+    <nav class="toc" aria-label="Merchant walkthrough">
+      <div class="tm-eyebrow toc__title">Merchant walkthrough</div>
+      @for (s of steps; track s.n; let i = $index) {
+        <button type="button" [class.on]="active() === i" (click)="select(i)"><span>{{ s.n }}</span>{{ s.title }}</button>
+      }
+    </nav>
+    <div class="cards">
+      @for (s of steps; track s.n; let i = $index) {
+        <article class="step" #stepCard [attr.data-index]="i" [class.on]="active() === i" [id]="'step-' + s.n">
+          <span class="num" [class]="'tm-tint-' + s.tint">{{ s.n }}</span>
+          <div class="step__body">
+            <h2>{{ s.title }}</h2>
+            <p>{{ s.copy }}</p>
+            <ul>
+              @for (d of s.details; track d) { <li>{{ d }}</li> }
+            </ul>
+            <a class="tm-btn go" [routerLink]="s.route" [queryParams]="s.query">{{ s.action }} →</a>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="shoppers">
+    <div class="tm-eyebrow">For shoppers</div>
+    <h2 class="h2">What shoppers see</h2>
+    <div class="tips">
+      @for (t of tips; track t.title) {
+        <div class="tip" [class]="'tm-tint-' + t.tint"><h3>{{ t.title }}</h3><p>{{ t.body }}</p></div>
+      }
+    </div>
+  </section>
+</main>
+<tm-public-footer [aboutLink]="true" />

@@ -1,0 +1,22 @@
+.wrap { display: flex; flex-direction: column; gap: 22px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 14px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface2); }
+.status-dot.ready { background: var(--t-green-fg); }
+.phase { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 20px; background: var(--surface); }
+.phase.dim { opacity: .55; }
+.phase__head { display: flex; align-items: flex-start; gap: 14px; }
+.num { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-weight: 700; flex: none; }
+.phase__title { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.phase__title strong { font-size: 17px; }
+.phase__title span { font-size: 13px; color: var(--muted); }
+.phase__body { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-left: 46px; font-size: 14px; }
+.phase__copy { padding-left: 46px; font-size: 14px; line-height: 1.5; color: var(--muted); text-wrap: pretty; }
+.checks { flex-direction: column; align-items: flex-start; gap: 8px; }
+.checks > div { display: flex; align-items: center; gap: 10px; }
+.check { width: 20px; height: 20px; border-radius: 50%; background: var(--t-green); color: var(--t-green-fg); display: grid; place-items: center; flex: none; }
+.meta { font-size: 13px; color: var(--muted); }
+.honest { font-size: 13px; line-height: 1.5; color: var(--muted); text-wrap: pretty; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.go { padding: 0 22px; font-size: 16px; }
+.phase__body .tm-btn:not(.tm-btn--stripe) { background: var(--bg); }

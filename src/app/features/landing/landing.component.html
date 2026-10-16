@@ -1,0 +1,99 @@
+<tm-public-header active="how" />
+
+<main class="page">
+  <section class="hero">
+    <div class="hero__copy">
+      <div class="kicker"><span class="tm-tag tm-tint-blue">TODD Market</span><span>For independent stores · Part of TODD</span></div>
+      <h1>Independent stores that send each other customers.</h1>
+      <p class="lead">Bring your catalog and TODD Market builds your store. Shoppers say what they need in plain words. When you don't carry it, we send them to a store that does, and you earn part of that sale.</p>
+      <div class="actions">
+        <a class="tm-btn tm-btn--primary tm-btn--lg" routerLink="/app/onboarding">Start selling</a>
+        <a class="tm-btn tm-btn--lg" [routerLink]="sampleStore">See a sample store</a>
+        <button type="button" class="tm-btn tm-btn--ghost tm-btn--lg watch" (click)="watch()">▶ Watch how it works</button>
+      </div>
+    </div>
+
+    <div class="sample" aria-hidden="true">
+      <div class="sample__search">
+        <tm-icon name="search" [size]="18" />
+        <span class="sample__q">Outfit for an outdoor October wedding, under $300</span>
+        <span class="sample__find">Find</span>
+      </div>
+      <div class="sample__card">
+        <div class="sample__best"><span class="tm-dot"></span>Best match · Betty's Bridal</div>
+        <div class="mosaic"><span class="m1"></span><span class="m2"></span><span class="m3"></span></div>
+        <div class="sample__row"><span>Rust satin and wool</span><span>$298</span></div>
+        <div class="sample__why">Midi length clears damp grass. The wrap covers the evening chill.</div>
+      </div>
+      <div class="sample__card sample__ref">
+        <div class="trace-row"><span>Betty's</span><span class="tm-trace"><span class="tm-dot"></span></span><span>Cameron's Dress Shoes</span></div>
+        <div>We don't carry shoes. Cameron's has a suede block heel that works on grass, $64.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="video" data-video-section="how-it-works" #videoSection>
+    <div class="video__head">
+      <div><div class="tm-eyebrow">How it works</div><h2>See a store go from catalog to first referral.</h2></div>
+      <span class="meta">1:30 · captions on, no sound needed</span>
+    </div>
+    <tm-how-it-works-video />
+  </section>
+
+  <section class="block">
+    <div class="tm-eyebrow">What's different</div>
+    <div class="grid grid--4">
+      @for (p of principles; track p.tag) {
+        <div class="tile">
+          <span class="tm-tag" [class]="'tm-tint-' + p.tint">{{ p.tag }}</span>
+          <h3>{{ p.title }}</h3>
+          <p>{{ p.body }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="tm-eyebrow">How it works</div>
+    <h2 class="narrow">From catalog to open store, then into the network.</h2>
+    <div class="grid grid--3">
+      @for (s of steps; track s.n) {
+        <div class="tile">
+          <span class="num" [class]="'tm-tint-' + s.tint">{{ s.n }}</span>
+          <h3 class="step-title">{{ s.title }}</h3>
+          <p>{{ s.body }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="network">
+    <div class="network__copy">
+      <div class="tm-eyebrow ink">The referral network</div>
+      <h2>When you can't sell it, you can still earn from it.</h2>
+      <p>Every referral is labeled, so shoppers know who is selling and who sets the price. You decide which stores you send shoppers to and the minimum commission you accept.</p>
+    </div>
+    <div class="example">
+      <div class="tm-label">Example</div>
+      <div class="trace-row"><span>Betty's Bridal</span><span class="tm-trace"><span class="tm-dot"></span></span><span>Cameron's</span></div>
+      <p>A groom asks Betty's for black oxfords. Betty's sends him to Cameron's, and he buys a $185 pair.</p>
+      <div class="example__total"><span>Betty's earns at Cameron's 10% rate</span><strong>$18.50</strong></div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2>Bring your catalog. We'll build the rest.</h2>
+    <p>Import from Shopify, Salesforce Commerce, a CSV file, or your own photos and price sheets. You approve the store before it goes live.</p>
+    <div class="actions">
+      <a class="tm-btn tm-btn--primary tm-btn--lg" routerLink="/app/onboarding">Start selling</a>
+      <a class="tm-btn tm-btn--lg" routerLink="/help">Read the Help guide</a>
+    </div>
+  </section>
+</main>
+
+<app-site-footer>
+  <a routerLink="/help">Help</a>
+  <a routerLink="/about">About</a>
+  <a routerLink="/pricing">Pricing</a>
+  <a [routerLink]="sampleStore">Sample store</a>
+</app-site-footer>

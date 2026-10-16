@@ -1,0 +1,110 @@
+@import "@taliferro/ui/styles/tokens.css";
+@import "@taliferro/ui/styles/controls.css";
+@import "@taliferro/ui/styles/universal-menu.css";
+@import "@taliferro/ui/styles/site-footer.css";
+
+/* TODD Market (design_handoff_todd_market_2): the Find theme plus the few
+   shared pieces every Market screen uses. Colors come only from tokens.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p { margin: 0; }
+a { color: var(--blue-ink); text-decoration: none; }
+a:hover { color: var(--blue); }
+img, svg, video { max-width: 100%; }
+
+/* Buttons: 44px pills (README "Shared frame"). Sized exactly, so the shared
+   controls.css never turns them into lozenges. */
+.tm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; min-height: 0; padding: 0 18px; border: 0; border-radius: 999px;
+  font: inherit; font-size: 15px; font-weight: 600; white-space: nowrap;
+  cursor: pointer; text-decoration: none; box-sizing: border-box;
+  background: var(--surface); color: var(--text);
+}
+.tm-btn:hover { background: var(--surface2); color: var(--text); }
+.tm-btn--primary { background: var(--accent, var(--blue)); color: #fff; font-weight: 700; }
+.tm-btn--primary:hover { background: var(--accent, var(--blue)); color: #fff; filter: brightness(.94); }
+.tm-btn--ghost { height: 36px; background: transparent; color: var(--blue-ink); }
+.tm-btn--ghost:hover { background: var(--t-blue); color: var(--blue-ink); }
+.tm-btn--lg { height: 48px; padding: 0 24px; font-weight: 700; }
+.tm-btn--block { width: 100%; }
+.tm-btn:disabled, .tm-btn[aria-disabled="true"] { opacity: .4; cursor: not-allowed; filter: none; }
+.tm-btn--stripe { background: #635bff; color: #fff; font-weight: 700; }
+.tm-btn--stripe:hover { background: #635bff; color: #fff; filter: brightness(.94); }
+
+/* Tags: tinted pairs. */
+.tm-tag {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap;
+  background: var(--surface); color: var(--muted);
+}
+.tm-tint-blue { background: var(--t-blue); color: var(--t-blue-fg); }
+.tm-tint-cyan { background: var(--t-cyan); color: var(--t-cyan-fg); }
+.tm-tint-pink { background: var(--t-pink); color: var(--t-pink-fg); }
+.tm-tint-violet { background: var(--t-violet); color: var(--t-violet-fg); }
+.tm-tint-yellow { background: var(--t-yellow); color: var(--t-yellow-fg); }
+.tm-tint-green { background: var(--t-green); color: var(--t-green-fg); }
+
+.tm-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tm-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+/* Inputs (Part 2 tokens): 48px pills, no border. --bg inside a card. */
+.tm-input {
+  width: 100%; height: 48px; padding: 0 18px; border: 0 !important; border-radius: 999px;
+  background: var(--surface); color: var(--text); font: inherit; font-size: 15px;
+  outline: none; box-shadow: none !important;
+}
+.tm-card .tm-input, .tm-on-surface .tm-input { background: var(--bg); }
+.tm-input:focus { box-shadow: 0 0 0 2px var(--blue) !important; }
+.tm-input--error, .tm-input--error:focus { box-shadow: 0 0 0 2px var(--t-pink-fg) !important; }
+.tm-error { font-size: 13px; font-weight: 600; color: var(--t-pink-fg); }
+
+.tm-card { background: var(--surface); border-radius: 20px; padding: 22px; }
+
+/* The signature dot: only the AI's best match and the network connection point. */
+.tm-dot {
+  display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--blue); box-shadow: 0 0 0 4px var(--t-blue), 0 0 12px var(--blue);
+}
+.tm-dot--pulse { animation: tmPulse 1.4s ease-in-out infinite; }
+
+/* Signal trace: a cyan line with the glowing dot travelling along it. */
+.tm-trace { position: relative; flex: 1; min-width: 40px; height: 10px; display: flex; align-items: center; }
+.tm-trace::before { content: ""; position: absolute; left: 0; right: 0; height: 2.5px; border-radius: 2px; background: var(--cyan); }
+.tm-trace > .tm-dot { position: absolute; top: 0; animation: tmTravel 2.4s ease-in-out infinite; }
+
+@keyframes tmTravel { 0% { left: 0; opacity: 0 } 12% { opacity: 1 } 70% { left: calc(100% - 10px); opacity: 1 } 100% { left: calc(100% - 10px); opacity: 0 } }
+@keyframes tmPulse { 0%, 100% { box-shadow: 0 0 0 4px var(--t-blue), 0 0 10px var(--blue) } 50% { box-shadow: 0 0 0 8px var(--t-blue), 0 0 22px var(--blue) } }
+@keyframes tmUp { from { transform: translateY(24px); opacity: 0 } to { transform: none; opacity: 1 } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-trace > .tm-dot, .tm-dot--pulse { animation: none; }
+}
+
+.tm-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* A store's tuned brand (brand-tuning.ts brandStyle() sets the -light/-dark
+   pairs on .tm-branded). Buttons use --accent; tags use --brand-tint. */
+.tm-branded { --brand-tint: var(--brand-tint-light, var(--t-pink)); --brand-tint-fg: var(--brand-tint-fg-light, var(--t-pink-fg)); }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not([data-theme="light"]) .tm-branded { --brand-tint: var(--brand-tint-dark, var(--t-pink)); --brand-tint-fg: var(--brand-tint-fg-dark, var(--t-pink-fg)); }
+}
+html.dark .tm-branded, :root[data-theme="dark"] .tm-branded { --brand-tint: var(--brand-tint-dark, var(--t-pink)); --brand-tint-fg: var(--brand-tint-fg-dark, var(--t-pink-fg)); }
+.tm-brand-tag { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--brand-tint); color: var(--brand-tint-fg); white-space: nowrap; }
+.tm-store-mark { flex: none; display: grid; place-items: center; font-weight: 700; background: var(--brand-tint); color: var(--brand-tint-fg); overflow: hidden; }
+.tm-store-mark img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+
+/* Merchant pages */
+.tm-h1 { font-size: 46px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.02; margin-bottom: 10px; }
+.tm-lead { font-size: 17px; color: var(--muted); max-width: 560px; text-wrap: pretty; }
+.tm-h4 { font-size: 15px; font-weight: 700; }
+@media (max-width: 600px) { .tm-h1 { font-size: 32px; } }

@@ -1,0 +1,63 @@
+<section class="wrap">
+  <div><h1 class="tm-h1">Make it yours.</h1><p class="tm-lead">Add your logo and colors. We adjust them so your store stays readable inside Find, in light and dark mode.</p></div>
+  <div class="grid">
+    <div class="col">
+      <div class="block">
+        <h2 class="tm-h4">Logo</h2>
+        <label class="drop">
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="onLogo($event)" class="tm-sr-only">
+          @if (logoUrl()) {
+            <img class="logo" [src]="logoUrl()" alt="">
+          } @else {
+            <span class="logo logo--initial" [style.background]="tuned().tintLight" [style.color]="tuned().tintFgLight">{{ initial() }}</span>
+          }
+          <span class="drop__text">
+            <strong>{{ logoUrl() ? 'Your logo' : 'Upload your logo' }}</strong>
+            <span>{{ logoUrl() ? 'Click to replace…' : 'PNG or SVG. Until then we use your initial.' }}</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="block">
+        <h2 class="tm-h4">Your colors</h2>
+        <p class="hint">{{ fromTheme() ? 'Pulled from your Shopify theme. Click a swatch to change it.' : 'Click a swatch to change it.' }}</p>
+        <div class="swatches">
+          @for (p of paletteRows(); track p.key) {
+            <label class="swatch">
+              <span class="chip" [style.background]="p.hex"><input type="color" [value]="p.hex" (input)="setColor(p.key, $event)" [attr.aria-label]="p.label + ' color'"></span>
+              <span class="swatch__text"><strong>{{ p.label }}</strong><span>{{ p.hex }}</span></span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="tuned">
+        <div class="tuned__head"><span class="tm-dot"></span><strong>Tuned for Find</strong></div>
+        <div class="tuned__chips">
+          @for (s of swatches(); track s.label) { <span class="tuned__chip"><span [style.background]="s.hex"></span>{{ s.label }}</span> }
+        </div>
+        @for (n of tuned().notes; track $index) { <p class="note">{{ n }}</p> }
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="samples">
+        <div class="sample sample--light">
+          <span class="sample__label">Light</span>
+          <span class="sample__btn" [style.background]="tuned().accent">Add to bag</span>
+          <span class="sample__tag" [style.background]="tuned().tintLight" [style.color]="tuned().tintFgLight">Bridesmaids</span>
+        </div>
+        <div class="sample sample--dark">
+          <span class="sample__label">Dark</span>
+          <span class="sample__btn" [style.background]="tuned().accent">Add to bag</span>
+          <span class="sample__tag" [style.background]="tuned().tintDark" [style.color]="tuned().tintFgDark">Bridesmaids</span>
+        </div>
+      </div>
+      @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
+      <div class="actions">
+        <button type="button" class="tm-btn tm-btn--primary go" [disabled]="busy()" (click)="build()">{{ busy() ? 'Starting…' : 'Build my store' }}</button>
+        <span class="meta">About a minute. You can change all of this later.</span>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,52 @@
+<tm-public-header active="pricing" />
+<main class="page">
+  <section class="intro">
+    <div class="tags"><span class="tm-tag tm-tint-blue">Pricing</span><span class="tm-tag tm-tint-yellow sample">Sample numbers · replace before launch</span></div>
+    <h1>A small fee per order. Referrals pay only when they work.</h1>
+    <p class="lead">There's no monthly plan. TODD Market takes a small fee on each order, Stripe charges its card fees on each sale, and you pay a commission only when another store's referral leads to a purchase.</p>
+  </section>
+
+  <section class="parts">
+    @for (p of parts; track p.tag) {
+      <div class="part">
+        <span class="tm-tag" [class]="'tm-tint-' + p.tint">{{ p.tag }}</span>
+        <div class="big">{{ p.big }}</div>
+        <p>{{ p.body }}</p>
+      </div>
+    }
+  </section>
+
+  <section class="calc">
+    <div class="calc__inputs">
+      <div class="tm-eyebrow ink">Try your numbers</div>
+      <label><span>Monthly sales: {{ salesLabel() }}</span>
+        <input type="range" min="1000" max="50000" step="1000" [value]="sales()" (input)="sales.set(num($event))"></label>
+      <label><span>Referrals you send that turn into sales: {{ referralLabel() }}</span>
+        <input type="range" min="0" max="10000" step="250" [value]="referralSales()" (input)="referralSales.set(num($event))"></label>
+      <span class="note">At an average 10% referral rate. Card fees use Stripe's standard US rate on an average $120 order as an example.</span>
+    </div>
+    <div class="calc__out">
+      @for (r of rows().list; track r.label) {
+        <div class="row"><span>{{ r.label }}</span><strong [class.good]="r.good">{{ r.value }}</strong></div>
+      }
+      <div class="net"><span>Net, after earnings</span><strong>{{ rows().net }}</strong></div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Questions</h2>
+    @for (f of faqs; track f.q; let i = $index) {
+      <div class="faq__item">
+        <button type="button" [attr.aria-expanded]="openFaq() === i" (click)="toggle(i)"><span>{{ f.q }}</span><span class="sign">{{ openFaq() === i ? '−' : '+' }}</span></button>
+        <!-- Answers stay in the page (hidden) so search engines read them. -->
+        <div class="faq__a" [hidden]="openFaq() !== i">{{ f.a }}</div>
+      </div>
+    }
+  </section>
+
+  <div class="actions">
+    <a class="tm-btn tm-btn--primary tm-btn--lg" routerLink="/app/onboarding">Start selling</a>
+    <a class="tm-btn tm-btn--lg" routerLink="/" fragment="how-it-works">Watch how it works</a>
+  </div>
+</main>
+<tm-public-footer />

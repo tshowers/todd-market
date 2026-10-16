@@ -1,0 +1,126 @@
+@if (store(); as s) {
+  <div class="shop tm-branded" [style]="style()">
+    @if (s.isSample) { <div class="sample">This is a sample store to show how TODD Market works. Checkout is turned off.</div> }
+
+    @if (!asked()) {
+      <!-- Home (d08, m04) -->
+      <header class="top"><span></span>
+        <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+      </header>
+      <main class="home">
+        <span class="tm-store-mark mark-lg">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
+        <h1 class="name">{{ s.name }}</h1>
+        <p class="lead">{{ s.heroLine || "Describe what you need. We'll put it together and explain the options." }}</p>
+        <form class="search" (ngSubmit)="ask()" role="search">
+          <label class="search__field"><tm-icon name="search" [size]="18" />
+            <input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Describe what you need" aria-label="Describe what you need" autocomplete="off"></label>
+          <button type="submit" class="tm-btn tm-btn--primary find">Find</button>
+        </form>
+        <p class="hint">Describe what you need. We'll put it together and explain the options.</p>
+        @if (tiles().length) {
+          <div class="tiles">
+            @for (t of tiles(); track t.label) {
+              <button type="button" class="tile" [class]="'tm-tint-' + t.tint" (click)="ask(t.query)">{{ t.label }}</button>
+            }
+          </div>
+        }
+      </main>
+    } @else {
+      <!-- Results header -->
+      <header class="bar">
+        <button type="button" class="brand" (click)="home()" aria-label="Store home">
+          <span class="tm-store-mark mark-sm">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
+          <span class="brand__name">{{ s.name }}</span>
+        </button>
+        <form class="pill" (ngSubmit)="ask()" role="search">
+          <tm-icon name="search" [size]="16" /><input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" aria-label="Search this store" autocomplete="off">
+        </form>
+        <button type="button" class="tm-btn tm-btn--primary find-sm" (click)="ask()">Find</button>
+        <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+      </header>
+
+      <main class="results">
+        @if (searching()) {
+          <p class="thinking"><span class="tm-dot tm-dot--pulse"></span>Putting it together…</p>
+        } @else if (error()) {
+          <p class="tm-error" role="alert">{{ error() }}</p>
+        } @else {
+          @if (result(); as r) {
+          @if (r.looks.length) {
+            <div class="source"><span class="tm-tag tm-tint-green">✓ In stock at {{ shortName() }} · {{ r.looks.length }} look{{ r.looks.length === 1 ? '' : 's' }}</span><span>{{ address() }}</span></div>
+            @if (r.heading) { <h2 class="heading">{{ r.heading }}</h2> }
+            @if (r.note) { <p class="note">{{ r.note }}</p> }
+            <div class="looks">
+              @for (look of r.looks; track look.id; let first = $first) {
+                <article class="look">
+                  <div class="mosaic" [class.single]="mosaic(look).length === 1">
+                    @for (m of mosaic(look); track $index) {
+                      <div class="tile-img" [style.background]="m.tint">@if (m.image) { <img [src]="m.image" [alt]="m.label"> } @else { <span>{{ m.label }}</span> }</div>
+                    }
+                    @if (first) { <span class="best"><span class="tm-dot"></span>Best match</span> }
+                  </div>
+                  <div class="look__head"><h3>{{ look.title }}</h3><strong>{{ look.totalCents | money }}</strong></div>
+                  <ul class="pieces">
+                    @for (item of look.items; track item.id) { <li><span>{{ item.title }}</span><span>{{ item.priceCents | money }}</span></li> }
+                  </ul>
+                  @if (look.why) { <p class="why">{{ look.why }}</p> }
+                  @if (look.tradeOff) { <p class="trade">Trade-off: {{ look.tradeOff }}</p> }
+                  @if (look.referral; as ref) {
+                    <div class="inline-ref">
+                      <div class="trace-row"><span>{{ shortName() }}</span><span class="tm-trace"><span class="tm-dot"></span></span><span>{{ ref.store.name }}</span></div>
+                      <p>We don't carry {{ ref.what }}. {{ ref.store.name }} has the {{ ref.item.title }}, {{ ref.item.priceCents | money }}, which keeps the look at {{ ref.totalWithCents | money }}.</p>
+                      @if (bag.has(ref.item.id)) { <span class="added">Added from {{ ref.store.name }}</span> }
+                      @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ ref.store.name }}'s {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
+                    </div>
+                  }
+                  <button type="button" class="tm-btn tm-btn--primary add" [disabled]="lookInBag(look)" (click)="addLook(look)">{{ lookInBag(look) ? 'In your bag' : (look.items.length > 1 ? 'Add look to bag' : 'Add to bag') }}</button>
+                </article>
+              }
+            </div>
+          } @else {
+            @if (r.referral; as ref) {
+            <!-- Referral variant C: the shared bag (d13, m08) -->
+            <div class="source"><span class="tm-tag tm-tint-violet">Not at {{ shortName() }} · found in the network</span><span>{{ address() }}</span></div>
+            <h2 class="heading">{{ ref.heading }}</h2>
+            <p class="note">We don't make these, so we asked {{ ref.store.name }}, a store we work with. Add them here and check out once for everything in your bag.</p>
+            @if (ref.store.trust) { <p class="trust">{{ ref.store.name }} · {{ ref.store.trust }}</p> }
+            <div class="cards">
+              @for (p of ref.items; track p.id) {
+                <article class="card">
+                  <div class="card__img">@if (p.image) { <img [src]="p.image" [alt]="p.title"> }<span class="from"><span class="cyan-dot"></span>From {{ ref.store.name.split(' ')[0] }}</span></div>
+                  <strong>{{ p.title }}</strong>
+                  <span class="meta">{{ p.priceCents | money }}{{ p.available ? '' : ' · out of stock' }}</span>
+                  @if (bag.has(p.id)) { <span class="added">In your bag</span> }
+                  @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="!p.available || adding() === p.id" (click)="addReferred(p)">Add to bag</button> }
+                </article>
+              }
+            </div>
+            } @else {
+            <h2 class="heading">Nothing here fits that yet.</h2>
+            <p class="note">Try describing it another way, or with fewer details. No store in the network carries it right now either.</p>
+            }
+          }
+
+          <footer class="rate">
+            <span>Right find?</span>
+            @for (x of ratings; track x.key) { <button type="button" [class.on]="rating() === x.key" (click)="rate(x.key)">{{ x.label }}</button> }
+            <span class="ms">{{ r.looks.length ? (r.ms / 1000).toFixed(1) + 's · from ' + r.productCount + ' products' : (r.referral ? 'Referral · ' + r.referral.store.name + ' sets its own prices' : '') }}</span>
+          </footer>
+          }
+        }
+      </main>
+    }
+
+    <nav class="tabbar" aria-label="Store">
+      <button type="button" [class.on]="!asked()" (click)="home()"><tm-icon name="store" [size]="20" />Shop</button>
+      <button type="button" [class.on]="asked()" (click)="asked() ? null : ask()"><tm-icon name="search" [size]="20" />Search</button>
+      <button type="button" (click)="bag.open.set(true)"><tm-icon name="shopping-bag" [size]="20" />Bag{{ bag.count() ? ' · ' + bag.count() : '' }}</button>
+      <a [routerLink]="auth.isSignedIn() ? '/account' : '/sign-in'" [queryParams]="auth.isSignedIn() ? null : { as: 'shopper', store: s.slug, next: '/account' }"><tm-icon name="user" [size]="20" />Account</a>
+    </nav>
+  </div>
+  <tm-bag-drawer [homeStoreId]="s.id" [storeSlug]="s.slug" />
+} @else if (notFound()) {
+  <main class="missing"><h1>That store isn't here.</h1><p>It may have closed, or the link is old.</p><a class="tm-btn tm-btn--primary" routerLink="/">Back to TODD Market</a></main>
+} @else {
+  <p class="loading">Opening the store…</p>
+}

@@ -1,0 +1,102 @@
+<section class="layout">
+  <nav class="side" aria-label="Settings">
+    <h1>Settings</h1>
+    @for (t of tabs; track t.key) { <button type="button" [class.on]="tab() === t.key" (click)="go(t.key)">{{ t.label }}</button> }
+  </nav>
+
+  @if (draft(); as d) {
+    <div class="main">
+      @switch (tab()) {
+        @case ('store') {
+          <div class="card grid2">
+            <label class="field"><span class="tm-label">Store name</span><input class="tm-input" [ngModel]="d.name" (ngModelChange)="setTop('name', $event)"></label>
+            <label class="field"><span class="tm-label">Support email</span><input class="tm-input" type="email" [ngModel]="d.settings.store.email" (ngModelChange)="patch('store', { email: $event })"></label>
+            <label class="field wide"><span class="tm-label">Web address</span>
+              <span class="addr"><span>market.taliferro.tech/s/</span><input class="tm-input" [ngModel]="d.slug" (ngModelChange)="setTop('slug', $event.toLowerCase())"></span></label>
+            <label class="field"><span class="tm-label">Phone</span><input class="tm-input" [ngModel]="d.settings.store.phone" (ngModelChange)="patch('store', { phone: $event })"></label>
+            <label class="field"><span class="tm-label">Store location (shown to shoppers)</span><input class="tm-input" placeholder="Durham, NC" [ngModel]="d.settings.store.location" (ngModelChange)="patch('store', { location: $event })"></label>
+            <label class="field wide"><span class="tm-label">Street address (for sales tax)</span><input class="tm-input" [ngModel]="d.settings.store.address?.line1" (ngModelChange)="setAddress('line1', $event)"></label>
+            <label class="field"><span class="tm-label">City</span><input class="tm-input" [ngModel]="d.settings.store.address?.city" (ngModelChange)="setAddress('city', $event)"></label>
+            <div class="pair">
+              <label class="field"><span class="tm-label">State</span><input class="tm-input" maxlength="2" [ngModel]="d.settings.store.address?.state" (ngModelChange)="setAddress('state', $event.toUpperCase())"></label>
+              <label class="field"><span class="tm-label">ZIP</span><input class="tm-input" [ngModel]="d.settings.store.address?.postal_code" (ngModelChange)="setAddress('postal_code', $event)"></label>
+            </div>
+            <div class="toggle-row wide"><span><strong>Offer in-store pickup</strong><span>Shoppers can choose pickup at checkout.</span></span>
+              <button type="button" role="switch" class="switch" [class.on]="d.settings.store.pickup" [attr.aria-checked]="d.settings.store.pickup" (click)="togglePickup(!d.settings.store.pickup)"><span></span></button></div>
+          </div>
+        }
+        @case ('returns') {
+          <div class="card">
+            <div class="block"><strong>Return window</strong>
+              <div class="seg">@for (w of windows; track w.days) { <button type="button" [class.on]="d.settings.returns.windowDays === w.days" (click)="patch('returns', { windowDays: w.days })">{{ w.label }}</button> }</div></div>
+            @if (d.settings.returns.windowDays) {
+              <div class="block"><strong>Who pays return shipping</strong>
+                <div class="seg">
+                  <button type="button" [class.on]="d.settings.returns.shopperPaysShipping" (click)="patch('returns', { shopperPaysShipping: true })">Shopper</button>
+                  <button type="button" [class.on]="!d.settings.returns.shopperPaysShipping" (click)="patch('returns', { shopperPaysShipping: false })">My store</button>
+                </div>
+                @if (d.settings.returns.shopperPaysShipping) { <span class="muted">{{ d.settings.returns.returnShippingCents | money: true }} is taken off the refund for a prepaid label.</span> }
+              </div>
+              <div class="block"><strong>Final sale</strong>
+                <div class="chips">@for (c of finalSaleOptions(); track c) { <button type="button" class="chip" [class.on]="d.settings.returns.finalSaleCategories.includes(c)" (click)="toggleFinal(c)">{{ c }}</button> }</div></div>
+              <div class="toggle-row"><span><strong>Require tags attached</strong><span>Shown to shoppers as part of the policy.</span></span>
+                <button type="button" role="switch" class="switch" [class.on]="d.settings.returns.requireTags" [attr.aria-checked]="d.settings.returns.requireTags" (click)="patch('returns', { requireTags: !d.settings.returns.requireTags })"><span></span></button></div>
+            }
+          </div>
+          <div class="preview"><div class="tm-eyebrow ink">What shoppers see</div><p>{{ policy() }}</p></div>
+        }
+        @case ('tax') {
+          <div class="card">
+            <div class="toggle-row"><span><strong>Calculate sales tax automatically</strong><span>Uses Stripe Tax to work out the rate for each order's address.</span></span>
+              <button type="button" role="switch" class="switch" [class.on]="d.settings.tax.auto" [attr.aria-checked]="d.settings.tax.auto" (click)="patch('tax', { auto: !d.settings.tax.auto })"><span></span></button></div>
+            <div class="toggle-row"><span><strong>Prices include tax</strong><span>Off: tax is added at checkout. Common in the US.</span></span>
+              <button type="button" role="switch" class="switch" [class.on]="d.settings.tax.pricesIncludeTax" [attr.aria-checked]="d.settings.tax.pricesIncludeTax" (click)="patch('tax', { pricesIncludeTax: !d.settings.tax.pricesIncludeTax })"><span></span></button></div>
+            <div class="block"><strong>Where you collect tax</strong>
+              @for (r of taxStates(); track r.id) {
+                <div class="reg"><span><strong>{{ r.name }}</strong><span>Registered · collecting</span></span><span class="tm-tag" [class.tm-tint-green]="r.status === 'active'">{{ r.status === 'active' ? 'Active' : r.status }}</span></div>
+              } @empty { <p class="muted">No states yet. Tax isn't added to orders until you add one.</p> }
+              @if (store()?.stripe?.connected) {
+                <label class="add-state"><span>+ Add a state</span>
+                  <select [disabled]="!!addingState()" (change)="addState($any($event.target).value); $any($event.target).value = ''">
+                    <option value="">Choose a state…</option>
+                    @for (s of states; track s[0]) { <option [value]="s[0]">{{ s[1] }}</option> }
+                  </select></label>
+              } @else {
+                <a routerLink="/app/onboarding/get-paid" class="muted">Connect Stripe first, then add states.</a>
+              }
+            </div>
+            <p class="muted">You register with each state where you owe tax; you, not TODD Market, collect and file it. Stripe Tax shows when you get close to a state's threshold. Ask your accountant which states apply to you.</p>
+          </div>
+        }
+        @case ('shipping') {
+          <div class="card">
+            <strong>Shipping rates</strong>
+            @for (r of d.settings.shipping.rates; track $index; let i = $index) {
+              <div class="rate">
+                <input class="tm-input" aria-label="Rate name" [ngModel]="r.label" (ngModelChange)="setRate(i, 'label', $event)">
+                <input class="tm-input" aria-label="Delivery time" placeholder="3–5 business days" [ngModel]="r.detail" (ngModelChange)="setRate(i, 'detail', $event)">
+                <span class="price"><span>$</span><input class="tm-input" type="number" min="0" step="0.5" aria-label="Price" [ngModel]="r.priceCents / 100" (ngModelChange)="setRate(i, 'priceCents', $event)"></span>
+                <button type="button" class="remove" aria-label="Remove rate" (click)="removeRate(i)">×</button>
+              </div>
+            }
+            <button type="button" class="tm-btn tm-btn--ghost add" (click)="addRate()">+ Add a rate</button>
+            <div class="toggle-row"><span><strong>Free standard shipping over {{ (d.settings.shipping.freeOverCents ?? 25000) | money }}</strong><span>Applied automatically at checkout.</span></span>
+              <button type="button" role="switch" class="switch" [class.on]="d.settings.shipping.freeOverCents !== null" [attr.aria-checked]="d.settings.shipping.freeOverCents !== null" (click)="setFreeOver(d.settings.shipping.freeOverCents === null)"><span></span></button></div>
+          </div>
+        }
+      }
+      @if (error()) { <p class="tm-error" role="alert">{{ error() }}</p> }
+      @if (savedNote() && !dirty()) { <p class="saved">Saved.</p> }
+    </div>
+  } @else if (error()) {
+    <p class="tm-error" role="alert">{{ error() }}</p>
+  }
+</section>
+
+@if (dirty()) {
+  <div class="unsaved" role="region" aria-label="Unsaved changes">
+    <span>Unsaved changes</span>
+    <button type="button" class="tm-btn tm-btn--ghost discard" (click)="discard()">Discard</button>
+    <button type="button" class="tm-btn save" [disabled]="saving()" (click)="save()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+  </div>
+}

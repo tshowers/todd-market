@@ -1,0 +1,8 @@
+/dist
+/node_modules
+/.angular
+/out-tsc
+.DS_Store
+# Source videos and design handoffs stay in Dropbox, not in git.
+/*.mp4
+/design_handoff_*/

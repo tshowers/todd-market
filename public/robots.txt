@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /account
+Disallow: /sign-in
+Disallow: /api/
+
+Sitemap: https://market.taliferro.tech/sitemap.xml

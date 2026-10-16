@@ -1,0 +1,117 @@
+@if (data(); as d) {
+  <section class="wrap">
+    <div class="head">
+      <div><div class="store">{{ d.store.name }}</div><h1 class="tm-h1">Referrals, {{ d.month }}</h1></div>
+      <span class="tm-tag tm-tint-cyan">{{ d.networkCount }} store{{ d.networkCount === 1 ? '' : 's' }} in your network</span>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi tm-tint-blue"><span>Shoppers you sent</span><strong>{{ d.kpis.sent }}</strong><small>{{ d.kpis.sentBought }} bought</small></div>
+      <div class="kpi tm-tint-green"><span>You earned</span><strong>{{ d.kpis.earnedCents | money: true }}</strong><small>{{ d.kpis.nextPayDate ? 'Paid ' + date(d.kpis.nextPayDate) : (d.kpis.earnedCents ? 'Paid' : 'Nothing yet') }}</small></div>
+      <div class="kpi tm-tint-cyan"><span>Shoppers sent to you</span><strong>{{ d.kpis.received }}</strong><small>{{ d.kpis.receivedBought }} bought</small></div>
+      <div class="kpi tm-tint-violet"><span>You paid out</span><strong>{{ d.kpis.paidOutCents | money: true }}</strong><small>On {{ d.kpis.salesFromReferralsCents | money }} in sales</small></div>
+    </div>
+
+    <div class="layout-toggle seg" role="tablist" aria-label="Layout">
+      <button type="button" role="tab" [class.on]="layout() === 'ledger'" (click)="layout.set('ledger')">Ledger</button>
+      <button type="button" role="tab" [class.on]="layout() === 'map'" (click)="layout.set('map')">Network map</button>
+    </div>
+
+    <div class="grid">
+      <div class="left">
+        @if (layout() === 'ledger') {
+          <div class="filters">
+            @for (f of ['all', 'sent', 'received']; track f) {
+              <button type="button" [class.on]="filter() === f" (click)="filter.set($any(f))">{{ f === 'all' ? 'All' : f === 'sent' ? 'Sent' : 'Received' }}</button>
+            }
+          </div>
+          <div class="ledger">
+            @for (r of rows(); track r.id) {
+              <div class="row">
+                <span class="dir" [class.in]="r.direction === 'received'" [attr.aria-label]="r.direction === 'sent' ? 'Sent' : 'Received'">{{ r.direction === 'sent' ? '↗' : '↙' }}</span>
+                <div class="what"><strong>{{ r.item }}</strong><span>{{ r.direction === 'sent' ? 'Sent to' : 'From' }} {{ r.store }} · {{ date(r.date) }}</span></div>
+                <span class="sale">{{ r.saleCents | money: true }}</span>
+                <span class="cut">{{ r.commissionCents ? (r.commissionCents | money: true) : '—' }}</span>
+                <span class="tm-tag" [class]="tag(r).tint ? 'tm-tint-' + tag(r).tint : ''">{{ tag(r).label }}</span>
+              </div>
+            } @empty {
+              <p class="empty">No referrals this month yet. When a shopper asks for something you don't carry, it shows up here.</p>
+            }
+          </div>
+          <p class="rule">Commission is held until the selling store's return window closes, then paid on the 1st. A return inside the window cancels it.</p>
+        } @else {
+          <div class="map">
+            <svg viewBox="0 0 400 320" role="img" aria-label="Your referral network">
+              @for (n of placed(); track n.id) {
+                @if (!n.blocked) { <path [attr.d]="path(n.x, n.y)" fill="none" stroke="var(--cyan)" [attr.stroke-width]="stroke(n)" stroke-linecap="round" /> }
+              }
+              <circle cx="200" cy="160" r="34" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
+              <text x="200" y="165" text-anchor="middle" class="me">{{ d.store.name.split(' ')[0] }}</text>
+              @for (n of placed(); track n.id) {
+                <g class="node" (click)="selected.set(n.id)" (keydown.enter)="selected.set(n.id)" tabindex="0" role="button" [attr.aria-label]="n.name">
+                  <circle [attr.cx]="n.x" [attr.cy]="n.y" r="26" [attr.fill]="isSelected(n.id) ? 'var(--t-blue)' : n.blocked ? 'var(--surface2)' : 'var(--bg)'" stroke="var(--text)" stroke-width="1.5" />
+                  <text [attr.x]="n.x" [attr.y]="n.y + 5" text-anchor="middle">{{ n.short }}</text>
+                </g>
+              }
+              @if (node(); as sel) { @if (!sel.blocked) { <circle r="5" fill="var(--blue)" class="travel"><animateMotion dur="2.4s" repeatCount="indefinite" [attr.path]="path(sel.x, sel.y)" /></circle> } }
+            </svg>
+            <p class="hint">Line weight is referral volume both ways. Click a store.</p>
+          </div>
+          @if (node(); as n) {
+            <div class="detail">
+              <span class="tm-label">{{ n.kind || 'Network store' }}</span>
+              <h2>{{ n.name }}</h2>
+              <div class="stats">
+                <div><strong>{{ n.sent }}</strong><span>sent to them</span></div>
+                <div><strong>{{ n.received }}</strong><span>sent to you</span></div>
+                <div><strong>{{ n.earnedCents | money: true }}</strong><span>you earned</span></div>
+                <div><strong>{{ n.ratePct === null ? '—' : n.ratePct + '%' }}</strong><span>their rate</span></div>
+              </div>
+              <button type="button" class="tm-btn" (click)="block(n.id, !n.blocked)">{{ n.blocked ? 'Unblock' : 'Block this store' }}</button>
+            </div>
+          } @else {
+            <p class="empty">Stores you trade referrals with appear here.</p>
+          }
+        }
+      </div>
+
+      <aside class="controls">
+        <h2>Controls</h2>
+        <div class="block">
+          <label for="min" class="tm-h4">Commission minimum</label>
+          <input id="min" type="range" min="0" max="20" step="1" [value]="minPct()" (input)="minPct.set(+$any($event.target).value)" (change)="saveMin()">
+          <p>Only send shoppers to stores paying you at least <strong>{{ minPct() }}%</strong>. {{ qualifying() }} of {{ d.totalStores }} stores qualify.</p>
+        </div>
+        @if (d.controls.categories.length) {
+          <div class="block">
+            <span class="tm-h4">Never send shoppers to stores that also sell</span>
+            <div class="chips">
+              @for (c of d.controls.categories; track c) {
+                <button type="button" class="chip" [class.on]="d.controls.blockedCategories.includes(c)" [attr.aria-pressed]="d.controls.blockedCategories.includes(c)" (click)="toggleCategory(c)">{{ c }}</button>
+              }
+            </div>
+          </div>
+        }
+        <div class="block">
+          <span class="tm-h4">Blocked stores</span>
+          @for (b of d.controls.blockedStores; track b.id) {
+            <div class="blocked"><span>{{ b.name }}</span><button type="button" class="tm-btn tm-btn--ghost" (click)="block(b.id, false)">Unblock</button></div>
+          } @empty { <p class="muted">None.</p> }
+        </div>
+        <div class="block">
+          <span class="tm-h4">Shoppers sent to you</span>
+          <div class="seg col">
+            <button type="button" [class.on]="d.controls.acceptFrom !== 'approved'" (click)="acceptFrom('any')">From any network store</button>
+            <button type="button" [class.on]="d.controls.acceptFrom === 'approved'" (click)="acceptFrom('approved')">Only stores I approve</button>
+          </div>
+          <p class="muted">Stores that send you shoppers earn {{ d.controls.offeredRatePct }}% when they buy.</p>
+        </div>
+        @if (error()) { <p class="tm-error" role="alert">{{ error() }}</p> }
+      </aside>
+    </div>
+  </section>
+} @else if (error()) {
+  <p class="tm-error" role="alert">{{ error() }}</p>
+} @else {
+  <p class="muted">Loading your referrals…</p>
+}

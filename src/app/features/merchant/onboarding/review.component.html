@@ -1,0 +1,44 @@
+<section class="wrap">
+  <div><h1 class="tm-h1">Your store is ready to review.</h1><p class="tm-lead">Change anything below, then publish.</p></div>
+  @if (data(); as d) {
+    <div class="grid">
+      <tm-store-preview [name]="d.store.name" [address]="address()" [logoUrl]="d.store.brand.logoUrl" [tuned]="d.store.brand.tuned"
+        [heroLine]="heroLine()" [collections]="liveCollections()">Live preview</tm-store-preview>
+      <div class="col">
+        <div class="block">
+          <h2 class="tm-h4">Voice</h2>
+          <div class="pills" role="radiogroup" aria-label="Voice">
+            @for (v of voices; track v.key) {
+              <button type="button" role="radio" class="pill" [class.on]="voice() === v.key" [attr.aria-checked]="voice() === v.key" (click)="setVoice(v.key)">{{ v.label }}</button>
+            }
+          </div>
+        </div>
+        <div class="block">
+          <h2 class="tm-h4">Collections</h2>
+          <div class="pills">
+            @for (c of d.collections; track c.id) {
+              <button type="button" class="coll" [class.on]="c.enabled" [attr.aria-pressed]="c.enabled" (click)="toggle(c.id)">{{ c.name }} · {{ c.productCount }}</button>
+            }
+          </div>
+        </div>
+        <div class="block">
+          <h2 class="tm-h4">Needs your eye</h2>
+          @for (i of openIssues(); track i.id) {
+            <div class="issue"><span>{{ i.message }}</span><button type="button" class="tm-btn fix" (click)="fix(i.id)">{{ i.actionLabel }}</button></div>
+          } @empty {
+            <div class="clear">All clear.</div>
+          }
+        </div>
+        @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
+        <div class="actions">
+          <button type="button" class="tm-btn tm-btn--primary go" [disabled]="busy()" (click)="next()">Next: get paid</button>
+          <button type="button" class="tm-btn" (click)="startOver()">Start over</button>
+        </div>
+      </div>
+    </div>
+  } @else if (!error()) {
+    <p class="loading">Loading your store…</p>
+  } @else {
+    <span class="tm-error" role="alert">{{ error() }}</span>
+  }
+</section>

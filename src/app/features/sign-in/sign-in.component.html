@@ -1,0 +1,64 @@
+@if (mode() === 'shopper' && store(); as s) {
+  <header class="store-bar">
+    @if (s.logoUrl) { <img class="store-mark" [src]="s.logoUrl" alt=""> }
+    @else { <span class="store-mark" [style.background]="s.tint" [style.color]="s.tintFg">{{ s.initial }}</span> }
+    <span class="store-name">{{ s.name }}</span>
+  </header>
+} @else {
+  <tm-public-header />
+}
+
+<main class="wrap">
+  <div class="col">
+    <div class="seg" role="tablist" aria-label="Sign in as">
+      <button type="button" role="tab" [class.on]="mode() === 'shopper'" [attr.aria-selected]="mode() === 'shopper'" (click)="setMode('shopper')">Shopper</button>
+      <button type="button" role="tab" [class.on]="mode() === 'merchant'" [attr.aria-selected]="mode() === 'merchant'" (click)="setMode('merchant')">Merchant</button>
+    </div>
+
+    @if (step() === 'form') {
+      <div class="head">
+        <h1>{{ title() }}</h1>
+        <p>{{ subtitle() }}</p>
+      </div>
+      <button type="button" class="tm-btn big apple" (click)="withProvider('apple')"><tm-icon name="apple" [size]="20" />Continue with Apple</button>
+      <button type="button" class="tm-btn big" (click)="withProvider('google')">Continue with Google</button>
+      <div class="or"><span></span>or<span></span></div>
+      <form (ngSubmit)="sendLink()" novalidate>
+        <label>
+          <span class="tm-label">Email</span>
+          <input class="tm-input" [class.tm-input--error]="emailError()" type="email" name="email" autocomplete="email"
+            placeholder="you@example.com" [ngModel]="email()" (ngModelChange)="email.set($event); emailError.set(false)"
+            [attr.aria-invalid]="emailError()" aria-describedby="email-error">
+        </label>
+        @if (emailError()) { <span class="tm-error" id="email-error">Enter a valid email address.</span> }
+        <button type="submit" class="tm-btn tm-btn--primary big" [disabled]="busy()">{{ busy() ? 'Sending…' : 'Email me a sign-in link' }}</button>
+      </form>
+      @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
+      <div class="fine">
+        @if (mode() === 'shopper') {
+          New here? Signing in creates your account. You can also check out as a guest.
+        } @else {
+          New store? <a routerLink="/app/onboarding">Start selling.</a> It takes about an hour from import to live.
+        }
+      </div>
+    } @else {
+      <div class="mail-tile"><tm-icon name="mail" [size]="28" /></div>
+      <h1>Check your email.</h1>
+      <p class="sent">We sent a sign-in link to <strong>{{ email() }}</strong>. It expires in 10 minutes.</p>
+      <div class="code">
+        <span class="tm-label">Or enter the 6-digit code</span>
+        <div class="cells">
+          @for (digit of code(); track $index; let i = $index) {
+            <input #cell class="cell" [class.filled]="digit" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+              [value]="digit" [attr.aria-label]="'Digit ' + (i + 1)" (input)="onCell(i, $event)" (keydown)="onKey(i, $event)">
+          }
+        </div>
+      </div>
+      @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
+      <div class="actions">
+        <button type="button" class="tm-btn tm-btn--primary tm-btn--lg" [disabled]="!codeComplete() || busy()" (click)="verify()">{{ busy() ? 'Signing in…' : 'Continue' }}</button>
+        <button type="button" class="tm-btn tm-btn--lg" (click)="useDifferentEmail()">Use a different email</button>
+      </div>
+    }
+  </div>
+</main>
