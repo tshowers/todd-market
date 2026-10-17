@@ -91,6 +91,33 @@ export class SettingsComponent implements OnInit {
     this.patch( 'store', { address: { ...current, [key]: value } } );
   }
 
+  readonly parcel = computed( () => ( { lengthIn: 12, widthIn: 10, heightIn: 4, weightOz: 16, ...( this.draft()?.settings.returns.parcel || {} ) } ) );
+
+  setParcel ( key: 'lengthIn' | 'widthIn' | 'heightIn' | 'weightOz', value: string ): void {
+    const n = Number( value );
+    if ( !Number.isFinite( n ) || n <= 0 ) return;
+    this.patch( 'returns', { parcel: { ...this.parcel(), [key]: n } } );
+  }
+
+  async connectShippo (): Promise<void> {
+    try {
+      const { url } = await this.merchant.connectShippo();
+      if ( typeof window !== 'undefined' ) window.location.href = url;
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    }
+  }
+
+  async disconnectShippo (): Promise<void> {
+    if ( typeof window !== 'undefined' && !window.confirm( 'Disconnect Shippo? Shoppers will need you to email them return labels.' ) ) return;
+    try {
+      await this.merchant.disconnectShippo();
+      this.store.update( ( s ) => s ? { ...s, shippo: { available: true, connected: false } } : s );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    }
+  }
+
   toggleFinal ( category: string ): void {
     const list = this.draft()?.settings.returns.finalSaleCategories || [];
     this.patch( 'returns', { finalSaleCategories: list.includes( category ) ? list.filter( ( c ) => c !== category ) : [...list, category] } );

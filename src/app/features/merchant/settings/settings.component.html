@@ -71,6 +71,28 @@
                 <button type="button" role="switch" class="switch" [class.on]="d.settings.returns.requireTags" [attr.aria-checked]="d.settings.returns.requireTags" (click)="patch('returns', { requireTags: !d.settings.returns.requireTags })"><span></span></button></div>
             }
           </div>
+          @if (d.settings.returns.windowDays) {
+            <div class="card">
+              <div class="block"><strong>Return labels</strong>
+                @if (!store()?.shippo?.available) {
+                  <span class="muted">Prepaid labels from your own Shippo account are coming soon. For now, email shoppers a label when they start a return.</span>
+                } @else if (store()?.shippo?.connected) {
+                  <span class="muted">✓ Shippo connected. When a shopper picks a label, we buy the cheapest one on your Shippo account and email it to them.@if (!d.settings.store.address?.line1) { Add your store address under Store so labels have somewhere to go. }</span>
+                  <div class="parcel">
+                    <label><span class="tm-label">Box (in)</span><span class="dims">
+                      <input class="tm-input" inputmode="decimal" aria-label="Length" [value]="parcel().lengthIn" (change)="setParcel('lengthIn', $any($event.target).value)">×
+                      <input class="tm-input" inputmode="decimal" aria-label="Width" [value]="parcel().widthIn" (change)="setParcel('widthIn', $any($event.target).value)">×
+                      <input class="tm-input" inputmode="decimal" aria-label="Height" [value]="parcel().heightIn" (change)="setParcel('heightIn', $any($event.target).value)"></span></label>
+                    <label><span class="tm-label">Weight (oz)</span><input class="tm-input" inputmode="decimal" [value]="parcel().weightOz" (change)="setParcel('weightOz', $any($event.target).value)"></label>
+                  </div>
+                  <div><button type="button" class="tm-btn tm-btn--ghost" (click)="disconnectShippo()">Disconnect Shippo</button></div>
+                } @else {
+                  <span class="muted">Connect your Shippo account and we'll email shoppers a prepaid label when they start a return. Labels are billed to your Shippo account, not TODD.</span>
+                  <div><button type="button" class="tm-btn tm-btn--primary" (click)="connectShippo()">Connect Shippo</button></div>
+                }
+              </div>
+            </div>
+          }
           <div class="preview"><div class="tm-eyebrow ink">What shoppers see</div><p>{{ policy() }}</p></div>
         }
         @case ('tax') {

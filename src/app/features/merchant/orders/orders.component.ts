@@ -24,8 +24,26 @@ import { MoneyPipe } from '../../../shared/money.pipe';
           <h2>Returns to receive</h2>
           @for (r of openReturns(); track r.id) {
             <div class="ret">
-              <div><strong>{{ r.orderId }}</strong> · {{ r.items.map(itemLabel).join(', ') }}<br><span class="muted">{{ r.reason }}{{ r.note ? ' · “' + r.note + '”' : '' }} · {{ r.sendBack === 'label' ? 'Email them a return label' : 'Drop-off at your store' }} · {{ r.email }}</span></div>
-              <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() === r.id" (click)="receive(r)">Received · refund {{ r.refundCents | money: true }}</button>
+              <div><strong>{{ r.orderId }}</strong> · {{ r.exchange ? 'Exchange: ' + swapDetail(r) : r.items.map(itemLabel).join(', ') }}<br><span class="muted">{{ r.reason }}{{ r.note ? ' · “' + r.note + '”' : '' }} · {{ r.sendBack === 'label' ? 'Email them a return label' : 'Drop-off at your store' }} · {{ r.email }}</span></div>
+              @if (r.exchange) {
+                <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() === r.id" (click)="receive(r)">Received · ship {{ swapLabel(r) }}</button>
+              } @else {
+                <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() === r.id" (click)="receive(r)">Received · refund {{ r.refundCents | money: true }}</button>
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (toShip().length) {
+        <div class="returns ship">
+          <h2>Exchanges to ship</h2>
+          @for (r of toShip(); track r.id) {
+            <div class="ret">
+              <div><strong>{{ r.orderId }}</strong> · {{ swapDetail(r) }}<br><span class="muted">Send to the order's address · {{ r.email }}</span></div>
+              <span class="shipit">
+                <input class="tm-input track" placeholder="Tracking number" [ngModel]="shipTracking()[r.id] || ''" (ngModelChange)="setTracking(r.id, $event)">
+                <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() === r.id" (click)="ship(r)">Mark shipped</button>
+              </span>
             </div>
           }
         </div>
@@ -56,6 +74,8 @@ import { MoneyPipe } from '../../../shared/money.pipe';
     .returns { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 20px; background: var(--t-yellow); color: var(--t-yellow-fg); }
     .returns h2 { font-size: 15px; font-weight: 700; }
     .ret { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 16px; background: var(--bg); color: var(--text); font-size: 14px; flex-wrap: wrap; }
+    .returns.ship { background: var(--t-cyan); color: var(--t-cyan-fg); }
+    .shipit { display: flex; gap: 8px; flex-wrap: wrap; }
     .order { display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 20px; background: var(--surface); }
     .top { display: flex; justify-content: space-between; gap: 10px; }
     ul { list-style: none; margin: 0; padding: 0; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
@@ -79,6 +99,10 @@ export class OrdersComponent implements OnInit {
     { key: 'received', label: 'Received' }, { key: 'preparing', label: 'Preparing' }, { key: 'shipped', label: 'Shipped' }, { key: 'delivered', label: 'Delivered' },
   ];
   readonly openReturns = computed( () => this.returns().filter( ( r ) => r.status === 'requested' ) );
+  readonly toShip = computed( () => this.returns().filter( ( r ) => r.status === 'exchange-to-ship' ) );
+  readonly shipTracking = signal<Record<string, string>>( {} );
+  readonly swapDetail = ( r: MerchantReturn ) => ( r.exchange || [] ).map( ( x ) => `${ x.title }: ${ x.fromTitle || 'as bought' } → ${ x.toTitle } × ${ x.quantity }` ).join( ', ' );
+  readonly swapLabel = ( r: MerchantReturn ) => ( r.exchange || [] ).map( ( x ) => x.toTitle ).join( ', ' );
   readonly itemLabel = ( i: { title: string; quantity: number } ) => `${ i.title } × ${ i.quantity }`;
 
   async ngOnInit (): Promise<void> {
@@ -112,6 +136,23 @@ export class OrdersComponent implements OnInit {
     try {
       await this.merchant.receiveReturn( r.id );
       await this.ngOnInit();
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    } finally {
+      this.busy.set( '' );
+    }
+  }
+
+  setTracking ( id: string, value: string ): void {
+    this.shipTracking.update( ( t ) => ( { ...t, [id]: value } ) );
+  }
+
+  async ship ( r: MerchantReturn ): Promise<void> {
+    this.busy.set( r.id );
+    this.error.set( '' );
+    try {
+      await this.merchant.shipExchange( r.id, this.shipTracking()[r.id] || '' );
+      this.returns.update( ( list ) => list.map( ( x ) => x.id === r.id ? { ...x, status: 'exchanged' } : x ) );
     } catch ( error ) {
       this.error.set( apiErrorMessage( error ) );
     } finally {

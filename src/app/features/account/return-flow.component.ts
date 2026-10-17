@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { AccountService, OrderDetail, OrderDetailPart, StartedReturn } from '../../services/account.service';
+import { AccountService, OrderDetail, OrderDetailPart, ReturnableItem, StartedReturn } from '../../services/account.service';
 import { apiErrorMessage } from '../../services/market-api.service';
 import { MoneyPipe } from '../../shared/money.pipe';
 
@@ -31,12 +31,16 @@ export class ReturnFlowComponent implements OnInit {
   readonly refundMethod = signal<'original' | 'exchange'>( 'original' );
   readonly sendBack = signal<'label' | 'dropoff'>( 'label' );
   readonly result = signal<StartedReturn | null>( null );
+  /** Exchange: the new variant for each returned item. */
+  readonly swaps = signal<Record<string, string>>( {} );
   readonly busy = signal( false );
   readonly error = signal( '' );
 
   readonly stepIndex = computed( () => this.steps.findIndex( ( s ) => s.key === this.step() ) );
   readonly key = ( i: { productId: string; variantId: string | null } ) => `${ i.productId }:${ i.variantId || '' }`;
   readonly selectedItems = computed( () => ( this.part()?.returnableItems || [] ).filter( ( i ) => this.chosen().has( this.key( i ) ) ) );
+  readonly canExchange = computed( () => this.selectedItems().length > 0 && this.selectedItems().every( ( i ) => ( i.swaps || [] ).length > 0 ) );
+  readonly swapsChosen = computed( () => this.selectedItems().every( ( i ) => !!this.swaps()[this.key( i )] ) );
   readonly refund = computed( () => {
     const part = this.part();
     if ( !part ) return 0;
@@ -61,6 +65,19 @@ export class ReturnFlowComponent implements OnInit {
     const next = new Set( this.chosen() );
     if ( next.has( k ) ) next.delete( k ); else next.add( k );
     this.chosen.set( next );
+    if ( !this.canExchange() ) this.refundMethod.set( 'original' );
+  }
+
+  swapFor ( i: ReturnableItem ): string {
+    return this.swaps()[this.key( i )] || '';
+  }
+
+  setSwap ( i: ReturnableItem, variantId: string ): void {
+    this.swaps.update( ( s ) => ( { ...s, [this.key( i )]: variantId } ) );
+  }
+
+  swapSummary ( r: StartedReturn ): string {
+    return ( r.exchange || [] ).map( ( x ) => `${ x.title } in ${ x.toTitle }` ).join( ', ' );
   }
 
   date ( ms: number | null | undefined ): string {
@@ -77,6 +94,7 @@ export class ReturnFlowComponent implements OnInit {
         storeId: part.storeId,
         items: this.selectedItems().map( ( i ) => ( { productId: i.productId, variantId: i.variantId, quantity: i.quantity } ) ),
         reason: this.reason(), note: this.note(), refundMethod: this.refundMethod(), sendBack: this.sendBack(),
+        ...( this.refundMethod() === 'exchange' ? { exchanges: this.swaps() } : {} ),
       } ) );
       this.step.set( 'done' );
     } catch ( error ) {

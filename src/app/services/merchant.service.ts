@@ -23,12 +23,17 @@ export interface MerchantOrder {
 }
 export interface MerchantReturn {
   id: string; orderId: string; email: string; items: { title: string; quantity: number }[]; reason: string; note: string;
-  refundMethod: string; sendBack: string; refundCents: number; status: 'requested' | 'refunded'; createdAt: number;
+  refundMethod: string; sendBack: string; refundCents: number; status: 'requested' | 'refunded' | 'exchange-to-ship' | 'exchanged'; createdAt: number;
+  exchange: { title: string; fromTitle: string; toTitle: string; quantity: number }[] | null;
 }
 export interface TaxRegistration { id: string; state: string; name: string; status: string }
 import { MarketApiService } from './market-api.service';
 
-export type ImportSource = 'shopify' | 'csv';
+export interface PricingProduct { id: string; title: string; image: string | null; priceCents: number | null; hidden: boolean }
+
+export type ImportSource = 'shopify' | 'csv' | 'files' | 'salesforce';
+
+export interface SalesforceCredentials { shortCode: string; organizationId: string; siteId: string; clientId: string; clientSecret: string; categoryId: string }
 
 export interface ImportRequest {
   source: ImportSource;
@@ -36,6 +41,8 @@ export interface ImportRequest {
   csvText?: string;
   fileName?: string;
   storeName?: string;
+  uploadIds?: string[];
+  salesforce?: SalesforceCredentials;
 }
 
 /** The signed-in merchant's store, and every onboarding call. */
@@ -55,6 +62,19 @@ export class MerchantService {
   async current (): Promise<MerchantStore | null> {
     const store = this.store();
     return store === undefined ? this.load() : store;
+  }
+
+  issueProducts ( issueId: string ): Promise<{ products: PricingProduct[] }> {
+    return this.api.get( `/merchant/issues/${ encodeURIComponent( issueId ) }/products` );
+  }
+
+  updateProduct ( id: string, change: { title?: string; priceCents?: number } ): Promise<{ id: string; title: string; priceCents: number; issueResolved: boolean }> {
+    return this.api.patch( `/merchant/products/${ encodeURIComponent( id ) }`, change );
+  }
+
+  /** "Upload files": one photo or PDF (as a data: URL) before Import. */
+  upload ( dataUrl: string, name: string ): Promise<{ id: string; kind: 'photo' | 'pdf'; name: string; url: string | null }> {
+    return this.api.post( '/merchant/uploads', { dataUrl, name } );
   }
 
   preview ( request: ImportRequest ): Promise<{ name: string; productCount: number; photoCount: number; unpriced: number }> {
@@ -161,6 +181,22 @@ export class MerchantService {
 
   setFulfillment ( orderId: string, status: string, tracking?: string ): Promise<unknown> {
     return this.api.post( `/merchant/orders/${ encodeURIComponent( orderId ) }/fulfillment`, { status, tracking } );
+  }
+
+  connectShippo (): Promise<{ url: string }> {
+    return this.api.post( '/merchant/settings/shippo/connect' );
+  }
+
+  finishShippo ( code: string, state: string ): Promise<{ connected: boolean }> {
+    return this.api.post( '/merchant/settings/shippo/callback', { code, state } );
+  }
+
+  disconnectShippo (): Promise<{ connected: boolean }> {
+    return this.api.delete( '/merchant/settings/shippo' );
+  }
+
+  shipExchange ( returnId: string, tracking: string ): Promise<unknown> {
+    return this.api.post( `/merchant/returns/${ encodeURIComponent( returnId ) }/ship-exchange`, { tracking } );
   }
 
   receiveReturn ( returnId: string ): Promise<unknown> {

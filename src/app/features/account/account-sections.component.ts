@@ -1,4 +1,4 @@
-import { TitleCasePipe } from '@angular/common';
+import { DatePipe, TitleCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '../../services/account.service';
 import { Address } from '../../services/checkout.service';
 import { apiErrorMessage } from '../../services/market-api.service';
+import { MarketAuthService, Passkey } from '../../services/market-auth.service';
 
 type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
 
@@ -13,7 +14,7 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
 @Component( {
   selector: 'tm-account-sections',
   standalone: true,
-  imports: [FormsModule, RouterLink, TitleCasePipe],
+  imports: [DatePipe, FormsModule, RouterLink, TitleCasePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @switch (section()) {
@@ -45,7 +46,16 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
       }
       @case ('security') {
         <h1>Sign-in &amp; security</h1>
-        <div class="row addr"><span><strong>Passkeys</strong><span>Sign in with Face ID or Touch ID instead of an email code. Coming soon.</span></span><span class="tm-tag">Soon</span></div>
+        <p class="muted">Passkeys let you sign in with Face ID, Touch ID or your device's screen lock instead of an email code. They work at every store on TODD Market.</p>
+        @for (k of passkeys(); track k.id) {
+          <div class="row addr"><span><strong>{{ k.name }}</strong><span>Added {{ k.createdAt ? (k.createdAt | date: 'MMM d, y') : 'just now' }}{{ k.lastUsedAt ? ' · last used ' + (k.lastUsedAt | date: 'MMM d') : '' }}</span></span><button type="button" class="tm-btn tm-btn--ghost" (click)="removePasskey(k.id)">Remove</button></div>
+        } @empty { <p class="muted">No passkeys yet.</p> }
+        @if (passkeySupported) {
+          <button type="button" class="tm-btn tm-btn--primary add-key" [disabled]="busy()" (click)="addPasskey()">{{ busy() ? 'Waiting for your device…' : 'Add a passkey' }}</button>
+        } @else {
+          <p class="muted">Passkeys can be added on market.taliferro.tech in a browser that supports them.</p>
+        }
+        @if (notice()) { <p class="notice">{{ notice() }}</p> }
         <div class="row addr"><span><strong>Sign-in methods</strong><span>Apple, Google, or a code sent to your email. All of them open the same TODD account.</span></span></div>
       }
     }
@@ -60,11 +70,18 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
     .add { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 8px; }
     .add button { grid-column: 1 / -1; justify-self: start; }
     .muted { color: var(--muted); font-size: 14px; }
+    .add-key { align-self: flex-start; }
+    .notice { font-size: 14px; color: var(--t-green-fg); }
   `],
 } )
 export class AccountSectionsComponent implements OnInit {
   private readonly route = inject( ActivatedRoute );
   private readonly account = inject( AccountService );
+  private readonly auth = inject( MarketAuthService );
+  readonly passkeySupported = this.auth.passkeysAvailable();
+  readonly passkeys = signal<Passkey[]>( [] );
+  readonly busy = signal( false );
+  readonly notice = signal( '' );
   readonly section = signal<Section>( 'saved' );
   readonly saved = signal<{ storeId: string; productId: string; title: string; storeName: string; storeSlug: string; image: string | null }[]>( [] );
   readonly addresses = signal<Address[]>( [] );
@@ -76,6 +93,7 @@ export class AccountSectionsComponent implements OnInit {
     this.section.set( this.route.snapshot.data['section'] as Section );
     try {
       if ( this.section() === 'payment-methods' ) this.methods.set( ( await this.account.paymentMethods() ).methods );
+      else if ( this.section() === 'security' ) this.passkeys.set( await this.auth.listPasskeys() );
       else if ( this.section() !== 'security' ) {
         const profile = await this.account.profile();
         this.saved.set( profile.saved );
@@ -100,6 +118,32 @@ export class AccountSectionsComponent implements OnInit {
     try {
       await this.account.removePaymentMethod( id );
       this.methods.update( ( list ) => list.filter( ( m ) => m.id !== id ) );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    }
+  }
+
+  async addPasskey (): Promise<void> {
+    this.busy.set( true );
+    this.error.set( '' );
+    this.notice.set( '' );
+    try {
+      const added = await this.auth.addPasskey();
+      this.passkeys.update( ( list ) => [added, ...list] );
+      this.notice.set( 'Passkey added. Next time, choose "Sign in with a passkey".' );
+    } catch ( error ) {
+      const name = ( error as { name?: string } )?.name;
+      if ( name === 'InvalidStateError' ) this.error.set( 'This device already has a passkey for your account.' );
+      else if ( name !== 'NotAllowedError' ) this.error.set( apiErrorMessage( error, "That passkey couldn't be added. Try again." ) );
+    } finally {
+      this.busy.set( false );
+    }
+  }
+
+  async removePasskey ( id: string ): Promise<void> {
+    try {
+      await this.auth.removePasskey( id );
+      this.passkeys.update( ( list ) => list.filter( ( k ) => k.id !== id ) );
     } catch ( error ) {
       this.error.set( apiErrorMessage( error ) );
     }

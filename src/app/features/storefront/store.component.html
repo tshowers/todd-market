@@ -50,6 +50,58 @@
             <div class="source"><span class="tm-tag tm-tint-green">✓ In stock at {{ shortName() }} · {{ r.looks.length }} look{{ r.looks.length === 1 ? '' : 's' }}</span><span>{{ address() }}</span></div>
             @if (r.heading) { <h2 class="heading">{{ r.heading }}</h2> }
             @if (r.note) { <p class="note">{{ r.note }}</p> }
+            @if (r.looks.length > 1) {
+              <div class="layout-toggle" role="group" aria-label="Results layout">
+                <button type="button" [class.on]="layout() === 'compare'" [attr.aria-pressed]="layout() === 'compare'" (click)="layoutChoice.set('compare')">Best match</button>
+                <button type="button" [class.on]="layout() === 'grid'" [attr.aria-pressed]="layout() === 'grid'" (click)="layoutChoice.set('grid')">All looks</button>
+              </div>
+            }
+            @if (layout() === 'compare') {
+            <!-- Best match + comparison (d10) -->
+            @if (r.looks[0]; as best) {
+            <article class="bm">
+              <div class="mosaic bm__mosaic" [class.single]="mosaic(best).length === 1">
+                @for (m of mosaic(best); track $index) {
+                  <div class="tile-img" [style.background]="m.tint">@if (m.image) { <img [src]="m.image" [alt]="m.label"> } @else { <span>{{ m.label }}</span> }</div>
+                }
+                <span class="best"><span class="tm-dot"></span>Best match</span>
+              </div>
+              <div class="bm__body">
+                <div class="look__head bm__head"><h3>{{ best.title }}</h3><strong>{{ (best.referral ? best.referral.totalWithCents : best.totalCents) | money }}</strong></div>
+                @if (best.why) { <p class="bm__why">{{ best.why }}</p> }
+                <ul class="pieces bm__pieces">
+                  @for (item of best.items; track item.id) { <li><span>{{ item.title }}</span><span>{{ item.priceCents | money }}</span></li> }
+                  @if (best.referral; as ref) { <li><span>{{ ref.item.title }}</span><span class="ref-price">{{ ref.store.name }} · {{ ref.item.priceCents | money }}</span></li> }
+                </ul>
+                @if (best.tradeOff) { <p class="trade">Trade-off: {{ best.tradeOff }}</p> }
+                @if (best.referral; as ref) {
+                  <div class="trace-row"><span>{{ shortName() }}</span><span class="tm-trace"><span class="tm-dot"></span></span><span>{{ ref.store.name }}</span></div>
+                }
+                <div class="bm__actions">
+                  <button type="button" class="tm-btn tm-btn--primary" [disabled]="allInBag(best) || !!adding()" (click)="addAll(best)">{{ allInBag(best) ? 'In your bag' : (pieceCount(best) === 2 ? 'Add both to bag' : pieceCount(best) > 2 ? 'Add all ' + pieceWord(pieceCount(best)) + ' to bag' : 'Add to bag') }}</button>
+                  @if (best.referral; as ref) {
+                    @if (bag.has(ref.item.id)) { <span class="added">Added from {{ ref.store.name }}</span> }
+                    @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ ref.store.name }}'s {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
+                  }
+                </div>
+              </div>
+            </article>
+            }
+            @if (r.looks.length > 1) {
+            <section class="others" aria-label="Other options">
+              <div class="others__row others__head"><span>Other options</span><span>Total</span><span>Better at</span><span>Gives up</span><span></span></div>
+              @for (look of r.looks.slice(1); track look.id; let i = $index) {
+                <div class="others__row">
+                  <span class="others__look"><span class="others__dot" [style.background]="i % 2 ? 'var(--surface2)' : 'var(--t-cyan)'">@if (mosaic(look)[0].image; as img) { <img [src]="img" alt=""> }</span><strong>{{ look.title }}</strong></span>
+                  <span class="others__total"><span class="others__label">Total</span>{{ look.totalCents | money }}</span>
+                  <span><span class="others__label">Better at</span>{{ look.betterAt || '—' }}</span>
+                  <span class="muted"><span class="others__label">Gives up</span>{{ look.givesUp || '—' }}</span>
+                  <button type="button" class="tm-btn tm-btn--ghost" [disabled]="lookInBag(look)" (click)="addLook(look)">{{ lookInBag(look) ? 'In your bag' : (look.items.length > 1 ? 'Add look to bag' : 'Add to bag') }}</button>
+                </div>
+              }
+            </section>
+            }
+            } @else {
             <div class="looks">
               @for (look of r.looks; track look.id; let first = $first) {
                 <article class="look">
@@ -77,6 +129,7 @@
                 </article>
               }
             </div>
+            }
           } @else {
             @if (r.referral; as ref) {
             <!-- Referral variant C: the shared bag (d13, m08) -->

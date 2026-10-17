@@ -26,22 +26,36 @@
           @case ('refund') {
             <span class="tm-label">Refund to</span>
             <label class="opt" [class.on]="refundMethod() === 'original'"><input type="radio" name="m" [checked]="refundMethod() === 'original'" (change)="refundMethod.set('original')"><span class="radio"></span><span><strong>Original payment</strong><span>{{ o.card ? o.card.brand + ' ending ' + o.card.last4 : 'Your card' }}</span></span></label>
-            <label class="opt" [class.on]="refundMethod() === 'exchange'"><input type="radio" name="m" [checked]="refundMethod() === 'exchange'" (change)="refundMethod.set('exchange')"><span class="radio"></span><span><strong>Exchange for another size</strong><span>You're refunded, and {{ p.storeName }} emails you to set up the new size.</span></span></label>
+            <label class="opt" [class.on]="refundMethod() === 'exchange'" [class.off]="!canExchange()"><input type="radio" name="m" [disabled]="!canExchange()" [checked]="refundMethod() === 'exchange'" (change)="refundMethod.set('exchange')"><span class="radio"></span><span><strong>Exchange for another size</strong><span>{{ canExchange() ? 'Same item, same price. ' + p.storeName + ' sends the new one when your return arrives. No charge.' : 'Not available: ' + p.storeName + " doesn't have another size of " + (selectedItems().length === 1 ? 'this item' : 'all of these') + ' at the same price.' }}</span></span></label>
+            @if (refundMethod() === 'exchange') {
+              @for (i of selectedItems(); track key(i)) {
+                <label class="field swap"><span class="tm-label">{{ i.title }}{{ i.variantTitle ? ' · now ' + i.variantTitle : '' }}</span>
+                  <select class="tm-input" [ngModel]="swapFor(i)" (ngModelChange)="setSwap(i, $event)">
+                    <option value="" disabled>Choose the new size</option>
+                    @for (o of i.swaps; track o.variantId) { <option [value]="o.variantId">{{ o.title }}</option> }
+                  </select>
+                </label>
+              }
+            }
             <span class="tm-label">Send it back</span>
-            <label class="opt" [class.on]="sendBack() === 'label'"><input type="radio" name="s" [checked]="sendBack() === 'label'" (change)="sendBack.set('label')"><span class="radio"></span><span><strong>Shipping label</strong><span>{{ p.returnShippingCents ? (p.returnShippingCents | money: true) + ' comes off your refund, per ' + p.storeName + "'s policy." : 'Free.' }} {{ p.storeName }} emails it to you.</span></span></label>
+            <label class="opt" [class.on]="sendBack() === 'label'"><input type="radio" name="s" [checked]="sendBack() === 'label'" (change)="sendBack.set('label')"><span class="radio"></span><span><strong>Shipping label</strong><span>{{ p.returnShippingCents && refundMethod() !== 'exchange' ? (p.returnShippingCents | money: true) + ' comes off your refund, per ' + p.storeName + "'s policy." : 'Free.' }} {{ p.storeName }} emails it to you.</span></span></label>
             @if (p.pickup || p.storeLocation) {
               <label class="opt" [class.on]="sendBack() === 'dropoff'"><input type="radio" name="s" [checked]="sendBack() === 'dropoff'" (change)="sendBack.set('dropoff')"><span class="radio"></span><span><strong>Drop off at {{ p.storeName }}</strong><span>{{ p.storeLocation || 'In store' }} · free</span></span></label>
             }
             @if (error()) { <p class="tm-error">{{ error() }}</p> }
-            <div class="actions"><button type="button" class="tm-btn" (click)="step.set('reason')">Back</button><button type="button" class="tm-btn tm-btn--primary" [disabled]="busy()" (click)="submit()">{{ busy() ? 'Starting…' : 'Start return' }}</button></div>
+            <div class="actions"><button type="button" class="tm-btn" (click)="step.set('reason')">Back</button><button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() || (refundMethod() === 'exchange' && !swapsChosen())" (click)="submit()">{{ busy() ? 'Starting…' : refundMethod() === 'exchange' ? 'Start exchange' : 'Start return' }}</button></div>
           }
           @case ('done') {
             @if (result(); as r) {
               <div class="done-tile">✓</div>
-              <h2>Return started.</h2>
-              <p>{{ r.sendBack === 'label' ? r.storeName + ' will email you a shipping label.' : 'Bring it to ' + r.storeName + (p.storeLocation ? ' in ' + p.storeLocation : '') + '.' }}
-                Once they receive it, {{ r.refundCents | money: true }} goes back to {{ r.card ? r.card.brand + ' ending ' + r.card.last4 : 'your card' }}, usually in 5–10 business days.</p>
-              <div class="actions"><a class="tm-btn" routerLink="/account">Back to orders</a></div>
+              <h2>{{ r.exchange ? 'Exchange started.' : 'Return started.' }}</h2>
+              <p>{{ r.sendBack === 'label' ? (r.label ? 'Your prepaid ' + r.label.carrier + ' label is ready, and we emailed it to you too.' : r.storeName + ' will email you a shipping label.') : 'Bring it to ' + r.storeName + (p.storeLocation ? ' in ' + p.storeLocation : '') + '.' }}
+                @if (r.exchange) { Once they receive it, they send your {{ swapSummary(r) }} and email you the tracking. There's nothing to pay. }
+                @else { Once they receive it, {{ r.refundCents | money: true }} goes back to {{ r.card ? r.card.brand + ' ending ' + r.card.last4 : 'your card' }}, usually in 5–10 business days. }</p>
+              <div class="actions">
+                @if (r.label) { <a class="tm-btn tm-btn--primary" [href]="r.label.labelUrl" target="_blank" rel="noopener">Download label</a> }
+                <a class="tm-btn" routerLink="/account">Back to orders</a>
+              </div>
             }
           }
         }
@@ -50,7 +64,8 @@
         <span class="tm-label">{{ p.storeName }} return policy</span>
         <p>{{ p.returnPolicy }}</p>
         @if (p.returnableUntil) { <p><strong>Return by {{ date(p.returnableUntil) }}</strong></p> }
-        <div class="refund"><span>Refund</span><strong>{{ refund() | money: true }}</strong></div>
+        @if (refundMethod() === 'exchange') { <div class="refund"><span>Exchange</span><strong>No charge</strong></div> }
+        @else { <div class="refund"><span>Refund</span><strong>{{ refund() | money: true }}</strong></div> }
         <p class="muted">Items from other network stores go back to the store that sold them.</p>
       </aside>
     </div>

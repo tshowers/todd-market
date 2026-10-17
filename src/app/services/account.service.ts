@@ -4,14 +4,14 @@ import { Address, QuotePart } from './checkout.service';
 import { MarketApiService } from './market-api.service';
 
 export interface AccountOrder { id: string; paidAt: number; totalCents: number; stores: string[]; status: 'in_progress' | 'delivered' | 'refunded'; image: string | null }
-export interface ReturnableItem { productId: string; variantId: string | null; title: string; variantTitle: string; priceCents: number; quantity: number; image: string | null }
+export interface ReturnableItem { productId: string; variantId: string | null; title: string; variantTitle: string; priceCents: number; quantity: number; image: string | null; swaps: { variantId: string; title: string }[] }
 export interface OrderDetailPart extends QuotePart {
   status: string; fulfillment: { status: string; tracking: string | null; deliveredAt: number | null } | null; refundedCents: number;
   returnableUntil: number | null; returnableItems: ReturnableItem[]; returnPolicy: string; returnShippingCents: number;
   storeLocation: string; pickup: boolean; referred: boolean;
 }
 export interface OrderDetail { id: string; status: string; paidAt: number; totalCents: number; card: { brand: string; last4: string } | null; address: Address; email: string; parts: OrderDetailPart[]; reasons: string[] }
-export interface StartedReturn { id: string; refundCents: number; sendBack: 'label' | 'dropoff'; refundMethod: 'original' | 'exchange'; storeName: string; card: { brand: string; last4: string } | null }
+export interface StartedReturn { id: string; refundCents: number; sendBack: 'label' | 'dropoff'; refundMethod: 'original' | 'exchange'; exchange: { title: string; toTitle: string }[] | null; label: { labelUrl: string; trackingNumber: string; carrier: string } | null; storeName: string; card: { brand: string; last4: string } | null }
 
 /** The signed-in shopper's account. */
 @Injectable( { providedIn: 'root' } )

@@ -24,7 +24,24 @@
         <div class="block">
           <h2 class="tm-h4">Needs your eye</h2>
           @for (i of openIssues(); track i.id) {
-            <div class="issue"><span>{{ i.message }}</span><button type="button" class="tm-btn fix" (click)="fix(i.id)">{{ i.actionLabel }}</button></div>
+            <div class="issue"><span>{{ i.message }}</span>
+              <span class="issue__actions">
+                @if (i.kind === 'no-price') { <button type="button" class="tm-btn tm-btn--primary fix" (click)="openPricing(i.id)">Add prices</button> }
+                <button type="button" class="tm-btn fix" (click)="fix(i.id)">{{ i.actionLabel }}</button>
+              </span>
+            </div>
+            @if (pricingIssue() === i.id) {
+              <ul class="pricing">
+                @for (p of pricing(); track p.id) {
+                  <li>
+                    @if (p.image) { <img [src]="p.image" alt=""> } @else { <span class="noimg"></span> }
+                    <input class="tm-input name" [value]="p.title" aria-label="Product name" (change)="rename(p.id, $any($event.target).value)">
+                    <span class="price"><span>$</span><input class="tm-input" inputmode="decimal" placeholder="0.00" [value]="p.priceCents ? (p.priceCents / 100).toFixed(2) : ''" aria-label="Price" (change)="price(p.id, $any($event.target).value)"></span>
+                    <span class="state">{{ p.priceCents ? '✓' : '' }}</span>
+                  </li>
+                }
+              </ul>
+            }
           } @empty {
             <div class="clear">All clear.</div>
           }

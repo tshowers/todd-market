@@ -39,6 +39,8 @@ export interface MerchantStore {
   customDomain: CustomDomain | null;
   /** Set when the store began as a claimed listing from the Find crawl. */
   claimedListing: { domain: string; interestCount: number } | null;
+  /** Return labels: Shippo switched on for TODD (available), and connected by this store. */
+  shippo?: { available: boolean; connected: boolean };
   settings: StoreSettings;
   stats: { productCount: number; photoCount: number; collectionCount: number; networkCount: number };
   stripe: { connected: boolean; chargesEnabled: boolean; payoutsEnabled: boolean; bankLast4: string | null; taxStatus: string | null };
@@ -50,7 +52,7 @@ export interface ShippingRate { id: string; label: string; detail: string; price
 
 export interface StoreSettings {
   store: { email: string; phone: string; location: string; pickup: boolean; address?: { line1: string; city: string; state: string; postal_code: string } | null };
-  returns: { windowDays: number; shopperPaysShipping: boolean; returnShippingCents: number; finalSaleCategories: string[]; requireTags: boolean };
+  returns: { windowDays: number; shopperPaysShipping: boolean; returnShippingCents: number; finalSaleCategories: string[]; requireTags: boolean; parcel?: Parcel | null };
   tax: { auto: boolean; pricesIncludeTax: boolean };
   shipping: { rates: ShippingRate[]; freeOverCents: number | null };
 }
@@ -61,7 +63,7 @@ export interface BuildJob { id: string; status: 'queued' | 'running' | 'done' | 
 export interface ReviewData {
   store: MerchantStore;
   collections: { id: string; name: string; productCount: number; enabled: boolean }[];
-  issues: { id: string; message: string; actionLabel: string; resolved: boolean }[];
+  issues: { id: string; kind: string; message: string; actionLabel: string; resolved: boolean }[];
 }
 
 export const ONBOARDING_STEPS: { key: OnboardingStep; label: string }[] = [
@@ -72,3 +74,5 @@ export const ONBOARDING_STEPS: { key: OnboardingStep; label: string }[] = [
   { key: 'get-paid', label: 'Get paid' },
   { key: 'live', label: 'Live' },
 ];
+
+export interface Parcel { lengthIn: number; widthIn: number; heightIn: number; weightOz: number }

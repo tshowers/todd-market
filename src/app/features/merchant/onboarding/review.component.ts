@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { ReviewData, Voice } from '../../../models/merchant.model';
 import { apiErrorMessage } from '../../../services/market-api.service';
-import { MerchantService } from '../../../services/merchant.service';
+import { MerchantService, PricingProduct } from '../../../services/merchant.service';
 import { StorePreviewComponent } from '../../../shared/store-preview/store-preview.component';
 import { storeAddress } from '../../../shared/store-address';
 
@@ -24,6 +24,9 @@ export class ReviewComponent implements OnInit {
   readonly voice = signal<Voice>( 'warm' );
   readonly error = signal( '' );
   readonly busy = signal( false );
+  /** "Add prices": the open no-price issue and its products. */
+  readonly pricingIssue = signal( '' );
+  readonly pricing = signal<PricingProduct[]>( [] );
   readonly voices: { key: Voice; label: string }[] = [
     { key: 'warm', label: 'Warm' }, { key: 'classic', label: 'Classic' }, { key: 'minimal', label: 'Minimal' },
   ];
@@ -63,6 +66,50 @@ export class ReviewComponent implements OnInit {
     if ( !current ) return;
     this.data.set( { ...current, issues: current.issues.map( ( i ) => i.id === id ? { ...i, resolved: true } : i ) } );
     await this.merchant.resolveIssue( id ).catch( ( error ) => this.error.set( apiErrorMessage( error ) ) );
+  }
+
+  async openPricing ( issueId: string ): Promise<void> {
+    if ( this.pricingIssue() === issueId ) {
+      this.pricingIssue.set( '' );
+      return;
+    }
+    try {
+      this.pricing.set( ( await this.merchant.issueProducts( issueId ) ).products.filter( ( p ) => !p.hidden ) );
+      this.pricingIssue.set( issueId );
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    }
+  }
+
+  async rename ( id: string, title: string ): Promise<void> {
+    if ( !title.trim() ) return;
+    await this.saveProduct( id, { title: title.trim() } );
+  }
+
+  async price ( id: string, value: string ): Promise<void> {
+    const dollars = Number( String( value ).replace( /[$,\s]/g, '' ) );
+    if ( !Number.isFinite( dollars ) || dollars <= 0 ) {
+      this.error.set( 'Enter a price like 24.00.' );
+      return;
+    }
+    await this.saveProduct( id, { priceCents: Math.round( dollars * 100 ) } );
+  }
+
+  private async saveProduct ( id: string, change: { title?: string; priceCents?: number } ): Promise<void> {
+    this.error.set( '' );
+    try {
+      const saved = await this.merchant.updateProduct( id, change );
+      this.pricing.update( ( list ) => list.map( ( p ) => p.id === id ? { ...p, title: saved.title, priceCents: saved.priceCents } : p ) );
+      const left = this.pricing().filter( ( p ) => !p.priceCents ).length;
+      const current = this.data();
+      if ( current ) {
+        const issueId = this.pricingIssue();
+        this.data.set( { ...current, issues: current.issues.map( ( i ) => i.id !== issueId ? i : saved.issueResolved ? { ...i, resolved: true } : { ...i, message: `${ left } product${ left === 1 ? ' has' : 's have' } no price.` } ) } );
+        if ( saved.issueResolved ) this.pricingIssue.set( '' );
+      }
+    } catch ( error ) {
+      this.error.set( apiErrorMessage( error ) );
+    }
   }
 
   async next (): Promise<void> {

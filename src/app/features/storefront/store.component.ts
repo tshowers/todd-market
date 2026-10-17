@@ -48,6 +48,14 @@ export class StoreComponent implements OnInit {
   readonly error = signal( '' );
   readonly rating = signal( '' );
   readonly adding = signal( '' );
+  /** The shopper's pick of results layout; null follows the result (d09 / d10). */
+  readonly layoutChoice = signal<'compare' | 'grid' | null>( null );
+  readonly layout = computed<'compare' | 'grid'>( () => {
+    const choice = this.layoutChoice();
+    if ( choice ) return choice;
+    const looks = this.result()?.looks || [];
+    return looks.length > 1 && looks.slice( 1 ).some( ( l ) => l.betterAt || l.givesUp ) ? 'compare' : 'grid';
+  } );
   readonly ratings = RATINGS;
 
   readonly style = computed( () => brandStyle( this.store()?.brand.tuned ) );
@@ -107,6 +115,24 @@ export class StoreComponent implements OnInit {
 
   lookInBag ( look: Look ): boolean {
     return look.items.every( ( i ) => this.bag.has( i.id ) );
+  }
+
+  /** Best match: the store's pieces plus the network piece, in one tap. */
+  async addAll ( look: Look ): Promise<void> {
+    this.addLook( look );
+    if ( look.referral && !this.bag.has( look.referral.item.id ) ) await this.addReferred( look.referral.item );
+  }
+
+  allInBag ( look: Look ): boolean {
+    return this.lookInBag( look ) && ( !look.referral || this.bag.has( look.referral.item.id ) );
+  }
+
+  pieceWord ( n: number ): string {
+    return ['', 'one', 'two', 'three', 'four', 'five', 'six'][n] || String( n );
+  }
+
+  pieceCount ( look: Look ): number {
+    return look.items.length + ( look.referral ? 1 : 0 );
   }
 
   /** A network item: record the referral first, so the sale is credited to this store. */

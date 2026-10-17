@@ -1,6 +1,6 @@
 {
   "name": "market",
-  "version": "2026.10.16-build.3",
+  "version": "2026.10.16-build.4",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -22,6 +22,7 @@
     "@angular/platform-server": "~19.2.25",
     "@angular/router": "^19.0.0",
     "@angular/ssr": "~19.2.27",
+    "@simplewebauthn/browser": "14.0.0",
     "@stripe/stripe-js": "^4.10.0",
     "@taliferro/ui": "file:../../taliferro-ui",
     "express": "^4.22.3",

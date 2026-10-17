@@ -22,6 +22,7 @@
       </div>
       <button type="button" class="tm-btn big apple" (click)="withProvider('apple')"><tm-icon name="apple" [size]="20" />Continue with Apple</button>
       <button type="button" class="tm-btn big" (click)="withProvider('google')">Continue with Google</button>
+      @if (passkeys) { <button type="button" class="tm-btn big" (click)="withPasskey()"><tm-icon name="key" [size]="20" />Sign in with a passkey</button> }
       <div class="or"><span></span>or<span></span></div>
       <form (ngSubmit)="sendLink()" novalidate>
         <label>

@@ -13,6 +13,7 @@ export const routes: Routes = [
   { path: 'help', loadComponent: () => import( './features/help/help.component' ).then( ( m ) => m.HelpComponent ) },
   { path: 'pricing', loadComponent: () => import( './features/pricing/pricing.component' ).then( ( m ) => m.PricingComponent ) },
   { path: 'ios', loadComponent: () => import( './features/ios/ios.component' ).then( ( m ) => m.IosComponent ) },
+  { path: 'shippo-oauth-redirect', canActivate: [signedInGuard], loadComponent: () => import( './features/shippo-redirect/shippo-redirect.component' ).then( ( m ) => m.ShippoRedirectComponent ) },
   { path: 'claim/:domain', canActivate: [signedInGuard], loadComponent: () => import( './features/claim/claim.component' ).then( ( m ) => m.ClaimComponent ) },
   { path: 'sign-in', loadComponent: () => import( './features/sign-in/sign-in.component' ).then( ( m ) => m.SignInComponent ) },
   {

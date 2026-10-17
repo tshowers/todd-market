@@ -63,3 +63,8 @@
 .rec.head { font-weight: 700; color: var(--muted); }
 .rec code { overflow-wrap: anywhere; font-size: 12px; }
 select.tm-input { appearance: auto; }
+
+.parcel { display: flex; gap: 16px; flex-wrap: wrap; padding-top: 6px; }
+.parcel label { display: flex; flex-direction: column; gap: 6px; }
+.parcel .dims { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.parcel input { width: 72px; }

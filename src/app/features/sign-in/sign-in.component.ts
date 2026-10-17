@@ -85,6 +85,20 @@ export class SignInComponent implements OnInit {
     this.error.set( '' );
   }
 
+  readonly passkeys = this.auth.passkeysAvailable();
+
+  async withPasskey (): Promise<void> {
+    this.error.set( '' );
+    try {
+      await this.auth.signInWithPasskey();
+      await this.router.navigateByUrl( this.next );
+    } catch ( error ) {
+      // Closing the system sheet isn't an error worth showing.
+      if ( ( error as { name?: string } )?.name === 'NotAllowedError' ) return;
+      this.error.set( apiErrorMessage( error, "That passkey didn't work. Try again or use your email." ) );
+    }
+  }
+
   async withProvider ( provider: 'apple' | 'google' ): Promise<void> {
     this.error.set( '' );
     try {

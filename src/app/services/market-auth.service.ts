@@ -4,8 +4,12 @@ import {
   GoogleAuthProvider, OAuthProvider, User, getAuth, onAuthStateChanged, signInWithCustomToken, signInWithPopup, signOut,
 } from 'firebase/auth';
 
+import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+
 import { environment } from '../../environments/environment';
 import { MarketApiService } from './market-api.service';
+
+export interface Passkey { id: string; name: string; createdAt: number | null; lastUsedAt: number | null }
 
 /** Who is signing in: a shopper (on a store) or a merchant (on TODD Market). */
 export type SignInContext = 'shopper' | 'merchant';
@@ -72,6 +76,38 @@ export class MarketAuthService {
   async verifyEmailCode ( email: string, code: string ): Promise<void> {
     const { token } = await this.api.post<{ token: string }>( '/auth/verify', { email, code } );
     await signInWithCustomToken( getAuth(), token );
+  }
+
+  /**
+   * Passkeys are bound to market.taliferro.tech, so they're offered there
+   * (and on localhost), not on a store's own domain.
+   */
+  passkeysAvailable (): boolean {
+    if ( !this.isBrowser || typeof window.PublicKeyCredential === 'undefined' ) return false;
+    return ['market.taliferro.tech', 'localhost'].includes( location.hostname );
+  }
+
+  /** Signs in with a passkey saved on this device or synced to it. */
+  async signInWithPasskey (): Promise<void> {
+    const { challengeId, options } = await this.api.post<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]['optionsJSON'] }>( '/auth/passkey/options' );
+    const response = await startAuthentication( { optionsJSON: options } );
+    const { token } = await this.api.post<{ token: string }>( '/auth/passkey/verify', { challengeId, response } );
+    await signInWithCustomToken( getAuth(), token );
+  }
+
+  /** Adds a passkey to the signed-in account. */
+  async addPasskey (): Promise<Passkey> {
+    const { challengeId, options } = await this.api.post<{ challengeId: string; options: Parameters<typeof startRegistration>[0]['optionsJSON'] }>( '/account/passkeys/options' );
+    const response = await startRegistration( { optionsJSON: options } );
+    return this.api.post<Passkey>( '/account/passkeys', { challengeId, response } );
+  }
+
+  async listPasskeys (): Promise<Passkey[]> {
+    return ( await this.api.get<{ passkeys: Passkey[] }>( '/account/passkeys' ) ).passkeys;
+  }
+
+  async removePasskey ( id: string ): Promise<void> {
+    await this.api.delete( `/account/passkeys/${ encodeURIComponent( id ) }` );
   }
 
   async signOut (): Promise<void> {
