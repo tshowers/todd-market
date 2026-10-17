@@ -89,12 +89,13 @@
               <div class="more-head"><strong>More from local shops</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
               <div class="litems">
                 @for (l of r.listingItems; track l.id) {
-                  <a class="litem" [href]="l.url" target="_blank" rel="noopener nofollow">
-                    <span class="lthumb"><img [src]="l.image" alt="" loading="lazy"></span>
+                  <div class="litem">
+                    <a class="lthumb" [href]="l.url" target="_blank" rel="noopener nofollow"><img [src]="l.image" alt="" loading="lazy"></a>
                     <span class="lstore">{{ l.storeName }}</span>
                     <strong>{{ l.title }}</strong>
-                    <span class="lgo">Shop on their site ↗</span>
-                  </a>
+                    <a class="lgo" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their site ↗</a>
+                    <button type="button" class="want" (click)="interestFor.set({ domain: l.storeDomain, name: l.storeName, url: l.storeUrl, productUrl: l.url, productTitle: l.title })">Want to buy it here?</button>
+                  </div>
                 }
               </div>
             </section>
@@ -108,12 +109,13 @@
               <div class="more-head"><strong>Local shops that may have it</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
               <div class="litems">
                 @for (l of r.listingItems; track l.id) {
-                  <a class="litem" [href]="l.url" target="_blank" rel="noopener nofollow">
-                    <span class="lthumb"><img [src]="l.image" alt="" loading="lazy"></span>
+                  <div class="litem">
+                    <a class="lthumb" [href]="l.url" target="_blank" rel="noopener nofollow"><img [src]="l.image" alt="" loading="lazy"></a>
                     <span class="lstore">{{ l.storeName }}</span>
                     <strong>{{ l.title }}</strong>
-                    <span class="lgo">Shop on their site ↗</span>
-                  </a>
+                    <a class="lgo" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their site ↗</a>
+                    <button type="button" class="want" (click)="interestFor.set({ domain: l.storeDomain, name: l.storeName, url: l.storeUrl, productUrl: l.url, productTitle: l.title })">Want to buy it here?</button>
+                  </div>
                 }
               </div>
             </section>
@@ -165,7 +167,8 @@
                 <strong>{{ l.name }}</strong>
                 <span class="meta">{{ l.category }}{{ l.city ? ' · ' + l.city : '' }}</span>
                 <a class="tm-btn visit" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their website ↗</a>
-                <a class="claim" [href]="claimHref(l.domain)">Is this your business?</a>
+                <button type="button" class="want" (click)="interestFor.set({ domain: l.domain, name: l.name, url: l.url })">Want to buy from them here?</button>
+                <a class="claim" [routerLink]="['/claim', l.domain]">Is this your business?</a>
               </div>
             </article>
           }
@@ -179,4 +182,7 @@
     </section>
   }
 </main>
+@if (interestFor(); as f) {
+  <tm-interest-dialog [domain]="f.domain" [shopName]="f.name" [shopUrl]="f.url" [productUrl]="f.productUrl || ''" [productTitle]="f.productTitle || ''" (closed)="interestFor.set(null)" />
+}
 <tm-bag-drawer [homeStoreId]="''" [storeSlug]="checkoutSlug()" />

@@ -37,6 +37,8 @@ export interface MerchantStore {
   };
   directoryCategory: string;
   customDomain: CustomDomain | null;
+  /** Set when the store began as a claimed listing from the Find crawl. */
+  claimedListing: { domain: string; interestCount: number } | null;
   settings: StoreSettings;
   stats: { productCount: number; photoCount: number; collectionCount: number; networkCount: number };
   stripe: { connected: boolean; chargesEnabled: boolean; payoutsEnabled: boolean; bankLast4: string | null; taxStatus: string | null };

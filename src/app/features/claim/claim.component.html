@@ -1,0 +1,61 @@
+<tm-public-header />
+<main class="page">
+  @if (listing(); as l) {
+    @if (removed()) {
+      <h1>{{ l.name }} is removed.</h1>
+      <p class="lead">It won't appear on TODD Market again. If you change your mind, you can always start selling: <a routerLink="/sell">see how it works</a>.</p>
+    } @else {
+      <span class="tm-tag tm-tint-blue">Is this your business?</span>
+      <h1>{{ l.name }}</h1>
+      <p class="lead">{{ l.domain }} is listed on TODD Market as a local shop that isn't here yet. Shoppers who find it are sent to your website.
+        @if (l.interestCount) { <strong>{{ l.interestCount }} shopper{{ l.interestCount === 1 ? '' : 's' }} asked to buy from you here.</strong> }</p>
+
+      @if (!intent()) {
+        <div class="choices">
+          <button type="button" class="choice" [disabled]="busy()" (click)="choose('claim')"><strong>Claim it</strong><span>Turn this into your own store: take orders here, get referrals from other shops. Free to set up; a small fee per order.</span></button>
+          <button type="button" class="choice" [disabled]="busy()" (click)="choose('remove')"><strong>Remove it</strong><span>Take the listing down. It won't be listed again.</span></button>
+        </div>
+      } @else if (!verified()) {
+        <h2>First, show us {{ l.domain }} is yours</h2>
+        <p class="muted">We check the website itself, so only its owner can {{ intent() }} it. Pick one:</p>
+        <div class="seg" role="tablist">
+          <button type="button" [class.on]="method() === 'email'" (click)="method.set('email')">Email at {{ l.domain }}</button>
+          <button type="button" [class.on]="method() === 'dns'" (click)="method.set('dns')">DNS record</button>
+          <button type="button" [class.on]="method() === 'meta'" (click)="method.set('meta')">Homepage tag</button>
+        </div>
+        @switch (method()) {
+          @case ('email') {
+            <div class="row"><input class="tm-input local" placeholder="hello" [ngModel]="localPart()" (ngModelChange)="localPart.set($event)"><span class="at">&#64;{{ l.domain }}</span>
+              <button type="button" class="tm-btn" [disabled]="busy() || !localPart()" (click)="sendCode()">Send code</button></div>
+            @if (sentTo()) {
+              <p class="muted">We sent a 6-digit code to {{ sentTo() }}.</p>
+              <div class="row"><input class="tm-input code" inputmode="numeric" maxlength="6" placeholder="123456" [ngModel]="code()" (ngModelChange)="code.set($event)">
+                <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy() || code().length < 6" (click)="verify()">Verify</button></div>
+            }
+          }
+          @case ('dns') {
+            @if (started(); as s) {
+              <p class="muted">Add this TXT record where you manage {{ l.domain }}'s DNS, then check. It can take up to an hour to show.</p>
+              <div class="rec"><span>{{ s.dns.type }}</span><code>{{ s.dns.name }}</code><code>{{ s.dns.value }}</code><button type="button" class="tm-btn tm-btn--ghost" (click)="copy(s.dns.value)">Copy</button></div>
+              <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy()" (click)="verify()">Check the record</button>
+            }
+          }
+          @case ('meta') {
+            @if (started(); as s) {
+              <p class="muted">Put this tag in your homepage's &lt;head&gt; (Shopify: Online Store → Themes → Edit code → theme.liquid), publish, then check.</p>
+              <div class="rec"><code>{{ s.meta }}</code><button type="button" class="tm-btn tm-btn--ghost" (click)="copy(s.meta)">Copy</button></div>
+              <button type="button" class="tm-btn tm-btn--primary" [disabled]="busy()" (click)="verify()">Check my homepage</button>
+            }
+          }
+        }
+      } @else {
+        <h2>Verified. {{ intent() === 'claim' ? 'Ready to set up your store?' : 'Remove the listing?' }}</h2>
+        <p class="muted">{{ intent() === 'claim' ? "We'll start your store with your name. Next you import your catalog (if you're on Shopify, it reads it from " + l.domain + '), and nothing goes live until you approve it.' : 'It comes down now and is never listed again.' }}</p>
+        <button type="button" class="tm-btn tm-btn--primary tm-btn--lg" [disabled]="busy()" (click)="complete()">{{ intent() === 'claim' ? 'Start my store' : 'Remove it' }}</button>
+      }
+      @if (error()) { <p class="tm-error" role="alert">{{ error() }}</p> }
+    }
+  } @else if (error()) {
+    <h1>That listing isn't here.</h1><p class="tm-error">{{ error() }}</p>
+  }
+</main>

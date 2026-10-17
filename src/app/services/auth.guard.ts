@@ -9,6 +9,6 @@ export const signedInGuard: CanActivateFn = async ( route, state ) => {
   const router = inject( Router );
   const user = await auth.ready;
   if ( user ) return true;
-  const as = state.url.startsWith( '/app' ) ? 'merchant' : 'shopper';
+  const as = state.url.startsWith( '/app' ) || state.url.startsWith( '/claim' ) ? 'merchant' : 'shopper';
   return router.createUrlTree( ['/sign-in'], { queryParams: { as, next: state.url } } );
 };

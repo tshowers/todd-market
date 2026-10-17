@@ -123,3 +123,6 @@
 .lbody strong { font-size: 17px; }
 .claim { font-size: 12px; color: var(--muted); }
 .more-btn { align-self: center; }
+
+.want { align-self: flex-start; border: 0; min-height: 0; padding: 4px 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--blue-ink); cursor: pointer; text-align: left; }
+.want:hover { text-decoration: underline; }

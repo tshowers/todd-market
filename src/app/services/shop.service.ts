@@ -41,6 +41,30 @@ export class ShopService {
     return this.api.post( '/network/search', { query, storeIds } );
   }
 
+  interest ( domain: string, body: { productUrl?: string; productTitle?: string; sessionId: string; email?: string; notify?: boolean } ): Promise<{ count: number }> {
+    return this.api.post( `/listings/${ encodeURIComponent( domain ) }/interest`, body );
+  }
+
+  listing ( domain: string ): Promise<{ domain: string; name: string; url: string; category: string; status: string; interestCount: number; products: { title: string; imageUrl: string }[] }> {
+    return this.api.get( `/listings/${ encodeURIComponent( domain ) }` );
+  }
+
+  startClaim ( domain: string, intent: 'claim' | 'remove' ): Promise<{ domain: string; name: string; intent: string; interestCount: number; dns: { type: string; name: string; value: string }; meta: string }> {
+    return this.api.post( `/listings/${ encodeURIComponent( domain ) }/claim`, { intent } );
+  }
+
+  sendClaimCode ( domain: string, localPart: string ): Promise<{ sentTo: string }> {
+    return this.api.post( `/listings/${ encodeURIComponent( domain ) }/claim/email`, { localPart } );
+  }
+
+  verifyClaim ( domain: string, method: 'email' | 'dns' | 'meta', code?: string ): Promise<{ verified: boolean }> {
+    return this.api.post( `/listings/${ encodeURIComponent( domain ) }/claim/verify`, { method, code } );
+  }
+
+  completeClaim ( domain: string ): Promise<{ removed?: boolean; storeId?: string; interestCount?: number }> {
+    return this.api.post( `/listings/${ encodeURIComponent( domain ) }/claim/complete` );
+  }
+
   /** On a store's own domain (shop.amysshoes.com), that store; otherwise null. */
   storeForThisHost (): Promise<{ slug: string; name: string } | null> {
     if ( !this.isBrowser || MARKET_HOSTS.test( location.hostname ) ) return Promise.resolve( null );

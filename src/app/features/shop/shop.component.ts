@@ -12,6 +12,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
 import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.component';
 import { RingIconComponent } from '../../shared/ring-icon/ring-icon.component';
 import { BagDrawerComponent } from '../storefront/bag-drawer.component';
+import { InterestDialogComponent } from './interest-dialog.component';
 
 type View = 'search' | 'stores';
 const PAGE = 24;
@@ -29,7 +30,7 @@ const SUGGESTIONS = [
 @Component( {
   selector: 'tm-shop',
   standalone: true,
-  imports: [FormsModule, RouterLink, IconComponent, MoneyPipe, RingIconComponent, PlatformMenuComponent, BagDrawerComponent],
+  imports: [FormsModule, RouterLink, IconComponent, MoneyPipe, RingIconComponent, PlatformMenuComponent, BagDrawerComponent, InterestDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css',
@@ -51,6 +52,8 @@ export class ShopComponent implements OnInit {
   readonly stores = signal<DirectoryStore[]>( [] );
   readonly listings = signal<Listing[]>( [] );
   readonly listingsShown = signal( 12 );
+  /** The "Want to buy it here?" dialog, when open. */
+  readonly interestFor = signal<{ domain: string; name: string; url: string; productUrl?: string; productTitle?: string } | null>( null );
   readonly filteredListings = computed( () => this.listings().filter( ( l ) => this.category() === 'All' || l.category === this.category() ) );
   readonly categories = signal<string[]>( [] );
   readonly category = signal( 'All' );
@@ -116,10 +119,6 @@ export class ShopComponent implements OnInit {
 
   storeLink ( s: { slug: string; customDomain?: string | null } ): string {
     return s.customDomain ? `https://${ s.customDomain }` : `/${ s.slug }`;
-  }
-
-  claimHref ( domain: string ): string {
-    return `mailto:support@taliferro.tech?subject=${ encodeURIComponent( `TODD Market listing: ${ domain }` ) }&body=${ encodeURIComponent( `I run ${ domain } and would like to claim / remove this listing.` ) }`;
   }
 
   initial ( name: string ): string {

@@ -17,6 +17,9 @@ const MAX_CSV_BYTES = 6 * 1024 * 1024;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="wrap">
+      @if (claimed(); as c) {
+        <div class="claimed tm-tint-green">Welcome, {{ storeName() }}.@if (c.interestCount) { {{ c.interestCount }} shopper{{ c.interestCount === 1 ? '' : 's' }} already asked to buy from you here, and we'll tell the ones who asked to know when you go live. }</div>
+      }
       <div><h1 class="tm-h1">Bring your catalog.</h1><p class="tm-lead">TODD Market reads it and builds your store. Nothing goes live until you approve it.</p></div>
       <div class="sources" role="radiogroup" aria-label="Where your catalog is">
         @for (s of sources; track s.key) {
@@ -54,6 +57,7 @@ const MAX_CSV_BYTES = 6 * 1024 * 1024;
     </section>`,
   styles: [`
     .wrap { display: flex; flex-direction: column; gap: 26px; max-width: 760px; }
+    .claimed { padding: 14px 18px; border-radius: 16px; font-size: 15px; line-height: 1.45; }
     .sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; }
     .source { cursor: pointer; font: inherit; text-align: left; display: flex; flex-direction: column; gap: 10px; padding: 18px; min-height: 0;
       border-radius: 16px; background: var(--surface); border: 2px solid transparent; color: var(--text); }
@@ -86,6 +90,8 @@ export class ImportComponent implements OnInit {
   readonly csvText = signal( '' );
   readonly fileName = signal( '' );
   readonly storeName = signal( '' );
+  /** A claimed listing: its address and how many shoppers asked for it. */
+  readonly claimed = signal<{ domain: string; interestCount: number } | null>( null );
   readonly found = signal<{ name: string; productCount: number; unpriced: number } | null>( null );
   readonly checking = signal( false );
   readonly busy = signal( false );
@@ -100,6 +106,12 @@ export class ImportComponent implements OnInit {
   async ngOnInit (): Promise<void> {
     const store = await this.merchant.current().catch( () => null );
     if ( store?.name ) this.storeName.set( store.name );
+    if ( store?.claimedListing ) {
+      this.claimed.set( store.claimedListing );
+      // Most independent shops run on Shopify: try reading the catalog from their site.
+      this.shopifyUrl.set( store.claimedListing.domain );
+      void this.previewShopify();
+    }
   }
 
   pick ( source: Source ): void {
