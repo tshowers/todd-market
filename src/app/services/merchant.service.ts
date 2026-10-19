@@ -20,6 +20,10 @@ export interface MerchantOrder {
   shippingRate: { label: string } | null; subtotalCents: number; shippingCents: number; taxCents: number; totalCents: number;
   platformFeeCents: number; commissionCents: number; refundedCents: number;
   fulfillment: { status: string; tracking: string | null };
+  /** A TODD staff test order (refunded at once, never sent to a supplier). */
+  test?: boolean;
+  /** Print-on-demand: the order at Printful. */
+  supplierOrder?: { provider: string; id: number | null; status: string } | null;
 }
 export interface MerchantReturn {
   id: string; orderId: string; email: string; items: { title: string; quantity: number }[]; reason: string; note: string;
@@ -31,7 +35,7 @@ import { MarketApiService } from './market-api.service';
 
 export interface PricingProduct { id: string; title: string; image: string | null; priceCents: number | null; hidden: boolean }
 
-export type ImportSource = 'shopify' | 'csv' | 'files' | 'salesforce';
+export type ImportSource = 'shopify' | 'csv' | 'files' | 'salesforce' | 'printful';
 
 export interface SalesforceCredentials { shortCode: string; organizationId: string; siteId: string; clientId: string; clientSecret: string; categoryId: string }
 
@@ -43,6 +47,7 @@ export interface ImportRequest {
   storeName?: string;
   uploadIds?: string[];
   salesforce?: SalesforceCredentials;
+  printfulToken?: string;
 }
 
 /** The signed-in merchant's store, and every onboarding call. */

@@ -51,7 +51,9 @@ import { MoneyPipe } from '../../../shared/money.pipe';
       @for (o of orders(); track o.id) {
         <article class="order">
           <div class="top">
-            <div><strong>{{ o.id }}</strong><span class="muted"> · {{ date(o.paidAt) }} · {{ o.address.name }}</span></div>
+            <div><strong>{{ o.id }}</strong><span class="muted"> · {{ date(o.paidAt) }} · {{ o.address.name }}</span>
+              @if (o.test) { <span class="tm-tag tm-tint-yellow">Test · refunded</span> }
+              @if (o.supplierOrder; as so) { <span class="tm-tag" [class.tm-tint-green]="so.status !== 'failed'" [class.tm-tint-pink]="so.status === 'failed'">{{ so.status === 'failed' ? 'Printful didn\'t take it' : 'Sent to Printful' + (so.id ? ' #' + so.id : '') }}</span> }</div>
             <strong>{{ o.totalCents | money: true }}</strong>
           </div>
           <ul>@for (i of o.items; track $index) { <li>{{ i.title }}{{ i.variantTitle ? ' · ' + i.variantTitle : '' }} × {{ i.quantity }}@if (i.referred) { <span class="tm-tag tm-tint-cyan">referred</span> }</li> }</ul>

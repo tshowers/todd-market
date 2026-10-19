@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { apiErrorMessage } from '../../../services/market-api.service';
 import { ImportRequest, MerchantService, SalesforceCredentials } from '../../../services/merchant.service';
 
-type Source = 'shopify' | 'salesforce' | 'csv' | 'files';
+type Source = 'shopify' | 'salesforce' | 'csv' | 'files' | 'printful';
 
 const MAX_CSV_BYTES = 6 * 1024 * 1024;
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
@@ -59,6 +59,13 @@ interface UploadItem { key: string; name: string; kind: 'photo' | 'pdf'; status:
           <div class="row"><button type="button" class="tm-btn" [disabled]="checking() || !sfComplete()" (click)="previewSalesforce()">{{ checking() ? 'Reading your catalog…' : 'Find my products' }}</button></div>
           <label class="field"><span class="tm-label">Store name</span>
             <input class="tm-input" placeholder="Betty's Bridal" [ngModel]="storeName()" (ngModelChange)="storeName.set($event)"></label>
+        }
+        @case ('printful') {
+          <p class="note">Design your products in Printful (Stores → Add product), then make a private token: Printful → Developers → Your tokens, with access to that store. Orders here go to Printful automatically: they print, pack with your store's name and ship, and bill your Printful account.</p>
+          <label class="field"><span class="tm-label">Printful private token</span>
+            <input class="tm-input" type="password" autocomplete="off" [ngModel]="printfulToken()" (ngModelChange)="printfulToken.set($event); found.set(null)" (blur)="previewPrintful()"></label>
+          <label class="field"><span class="tm-label">Store name</span>
+            <input class="tm-input" placeholder="TODD Tees" [ngModel]="storeName()" (ngModelChange)="storeName.set($event)"></label>
         }
         @case ('files') {
           <label class="drop">
@@ -135,6 +142,7 @@ export class ImportComponent implements OnInit {
     { key: 'salesforce', mark: 'SF', label: 'Salesforce Commerce', sub: 'With your admin' },
     { key: 'csv', mark: 'CSV', label: 'CSV file', sub: 'Any spreadsheet export' },
     { key: 'files', mark: '↑', label: 'Upload files', sub: 'Photos and PDF catalogs' },
+    { key: 'printful', mark: 'PF', label: 'Printful', sub: 'Print on demand, no inventory' },
   ];
 
   readonly source = signal<Source>( 'shopify' );
@@ -146,6 +154,7 @@ export class ImportComponent implements OnInit {
   readonly claimed = signal<{ domain: string; interestCount: number } | null>( null );
   readonly found = signal<{ name: string; productCount: number; unpriced: number } | null>( null );
   readonly uploads = signal<UploadItem[]>( [] );
+  readonly printfulToken = signal( '' );
   /** Salesforce Commerce credentials: sent with the read, never stored. */
   sf: SalesforceCredentials = { shortCode: '', organizationId: '', siteId: '', clientId: '', clientSecret: '', categoryId: '' };
   readonly sfVersion = signal( 0 );
@@ -166,6 +175,7 @@ export class ImportComponent implements OnInit {
   readonly canContinue = computed( () => {
     if ( this.source() === 'shopify' ) return this.shopifyUrl().trim().length > 3;
     if ( this.source() === 'csv' ) return !!this.csvText() && this.storeName().trim().length > 0;
+    if ( this.source() === 'printful' ) return !!this.found() && this.storeName().trim().length > 0;
     if ( this.source() === 'salesforce' ) return !!this.found() && this.sfComplete() && this.storeName().trim().length > 0;
     if ( this.source() === 'files' ) {
       const list = this.uploads();
@@ -211,6 +221,11 @@ export class ImportComponent implements OnInit {
       void this.runPreview( { source: 'csv', csvText: this.csvText(), fileName: file.name } );
     };
     reader.readAsText( file );
+  }
+
+  async previewPrintful (): Promise<void> {
+    if ( this.printfulToken().trim().length < 20 ) return;
+    await this.runPreview( { source: 'printful', printfulToken: this.printfulToken().trim() } );
   }
 
   setSf ( key: keyof SalesforceCredentials, value: string ): void {
@@ -280,6 +295,8 @@ export class ImportComponent implements OnInit {
   async next (): Promise<void> {
     const request: ImportRequest = this.source() === 'shopify'
       ? { source: 'shopify', shopifyUrl: this.shopifyUrl(), storeName: this.found()?.name }
+      : this.source() === 'printful'
+        ? { source: 'printful', printfulToken: this.printfulToken().trim(), storeName: this.storeName() }
       : this.source() === 'salesforce'
         ? { source: 'salesforce', salesforce: this.sfRequest(), storeName: this.storeName() }
       : this.source() === 'files'
