@@ -114,6 +114,8 @@ export class ShopComponent implements OnInit {
   }
 
   add ( item: NetworkItem ): void {
+    // Sample stores can't take payments; checkout would refuse the bag.
+    if ( item.isSample ) return;
     this.bag.add( item );
   }
 
