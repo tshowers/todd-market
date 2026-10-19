@@ -8,3 +8,9 @@ export function shortStoreName ( name: string ): string {
   const first = full.split( /\s+/ )[0] || '';
   return /[’']s$/.test( first ) ? first.replace( /’/g, "'" ) : full;
 }
+
+/** "Cameron's" (already possessive) or "Linen & Loom's": for "Add Cameron's heel". */
+export function storePossessive ( name: string ): string {
+  const short = shortStoreName( name );
+  return /'s$/.test( short ) ? short : `${ short }'s`;
+}

@@ -39,4 +39,18 @@ describe( 'Referral: "we don\'t carry that, but this store does"', () => {
     cy.contains( '.what', 'Suede block heel' ).should( 'contain', 'Sent to Cameron\'s Dress Shoes' )
       .parent().should( 'contain', '$6.40' ).and( 'contain', 'Pending' );
   } );
+
+  it( 'a look missing a piece gets it from the network inline: "Add Cameron\'s …"', () => {
+    // The stand-in AI (MARKET_DEV_AI=stub) says the look is missing shoes.
+    cy.visit( '/linen-loom' );
+    cy.get( 'input[name=q]' ).type( 'linen shirt and shoes{enter}' );
+    cy.get( '.inline-ref', { timeout: 15000 } ).within( () => {
+      cy.contains( 'Linen & Loom' );
+      cy.contains( 'Cameron\'s Dress Shoes' );
+      cy.contains( 'We don\'t carry shoes. Cameron\'s Dress Shoes has the' );
+      cy.contains( 'button', /^Add Cameron's Suede block heel/ ).click();
+      cy.contains( 'Added from Cameron\'s Dress Shoes' );
+    } );
+    cy.get( 'button.bag-pill' ).first().should( 'contain', '1' );
+  } );
 } );

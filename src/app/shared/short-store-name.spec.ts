@@ -1,4 +1,4 @@
-import { shortStoreName } from './short-store-name';
+import { shortStoreName, storePossessive } from './short-store-name';
 
 describe( 'shortStoreName', () => {
   it( 'keeps a possessive first word and otherwise the whole name', () => {
@@ -7,5 +7,10 @@ describe( 'shortStoreName', () => {
     expect( shortStoreName( 'Linen & Loom' ) ).toBe( 'Linen & Loom' );
     expect( shortStoreName( 'The Shoe Box' ) ).toBe( 'The Shoe Box' );
     expect( shortStoreName( '' ) ).toBe( '' );
+  } );
+
+  it( 'makes a possessive without doubling it', () => {
+    expect( storePossessive( "Cameron's Dress Shoes" ) ).toBe( "Cameron's" );
+    expect( storePossessive( 'Linen & Loom' ) ).toBe( "Linen & Loom's" );
   } );
 } );

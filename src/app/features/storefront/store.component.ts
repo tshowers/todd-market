@@ -10,7 +10,7 @@ import { SeoService } from '../../services/seo.service';
 import { StorefrontService } from '../../services/storefront.service';
 import { brandStyle } from '../../shared/brand/brand-tuning';
 import { IconComponent } from '../../shared/icon/icon.component';
-import { shortStoreName } from '../../shared/short-store-name';
+import { shortStoreName, storePossessive } from '../../shared/short-store-name';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { storeAddress } from '../../shared/store-address';
 import { BagDrawerComponent } from './bag-drawer.component';
@@ -66,6 +66,7 @@ export class StoreComponent implements OnInit {
   readonly asked = computed( () => !!this.result() || this.searching() );
   readonly shortName = computed( () => shortStoreName( this.store()?.name || '' ) );
   readonly short = shortStoreName;
+  readonly possessive = storePossessive;
 
   async ngOnInit (): Promise<void> {
     const slug = this.slugOverride() || this.route.snapshot.paramMap.get( 'slug' ) || '';

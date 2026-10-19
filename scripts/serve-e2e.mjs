@@ -16,7 +16,7 @@ const backend = path.resolve( process.env.MARKET_BACKEND_DIR || path.resolve( he
 const API_PORT = 5055;
 const WEB_PORT = 4311;
 
-const api = spawn( process.execPath, ['market/dev/server.js'], { cwd: backend, stdio: 'inherit', env: { ...process.env, PORT: String( API_PORT ), MARKET_PUBLIC_URL: `http://localhost:${ WEB_PORT }` } } );
+const api = spawn( process.execPath, ['market/dev/server.js'], { cwd: backend, stdio: 'inherit', env: { ...process.env, PORT: String( API_PORT ), MARKET_PUBLIC_URL: `http://localhost:${ WEB_PORT }`, MARKET_DEV_REAL_SAMPLES: "1", MARKET_DEV_AI: "stub" } } );
 const stop = () => { api.kill(); process.exit( 0 ); };
 process.on( 'SIGINT', stop );
 process.on( 'SIGTERM', stop );

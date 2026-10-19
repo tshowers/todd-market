@@ -81,7 +81,7 @@
                   <button type="button" class="tm-btn tm-btn--primary" [disabled]="allInBag(best) || !!adding()" (click)="addAll(best)">{{ allInBag(best) ? 'In your bag' : (pieceCount(best) === 2 ? 'Add both to bag' : pieceCount(best) > 2 ? 'Add all ' + pieceWord(pieceCount(best)) + ' to bag' : 'Add to bag') }}</button>
                   @if (best.referral; as ref) {
                     @if (bag.has(ref.item.id)) { <span class="added">Added from {{ ref.store.name }}</span> }
-                    @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ ref.store.name }}'s {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
+                    @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ possessive(ref.store.name) }} {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
                   }
                 </div>
               </div>
@@ -122,7 +122,7 @@
                       <div class="trace-row"><span>{{ shortName() }}</span><span class="tm-trace"><span class="tm-dot"></span></span><span>{{ ref.store.name }}</span></div>
                       <p>We don't carry {{ ref.what }}. {{ ref.store.name }} has the {{ ref.item.title }}, {{ ref.item.priceCents | money }}, which keeps the look at {{ ref.totalWithCents | money }}.</p>
                       @if (bag.has(ref.item.id)) { <span class="added">Added from {{ ref.store.name }}</span> }
-                      @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ ref.store.name }}'s {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
+                      @else { <button type="button" class="tm-btn tm-btn--ghost" [disabled]="adding() === ref.item.id" (click)="addReferred(ref.item)">Add {{ possessive(ref.store.name) }} {{ ref.item.title }}, {{ ref.item.priceCents | money }}</button> }
                     </div>
                   }
                   <button type="button" class="tm-btn tm-btn--primary add" [disabled]="lookInBag(look)" (click)="addLook(look)">{{ lookInBag(look) ? 'In your bag' : (look.items.length > 1 ? 'Add look to bag' : 'Add to bag') }}</button>
