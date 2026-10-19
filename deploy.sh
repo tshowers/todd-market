@@ -15,6 +15,9 @@ npm run build
 echo "Running unit tests..."
 npm run test:ci
 
+echo "Running end-to-end tests (needs the backend repo next to web-products; see README)..."
+npm run e2e
+
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [ -n "$(git status --porcelain)" ]; then
   echo "Build and tests passed - committing changes before deploy..."
   VERSION="$(node -p "require('./package.json').version")"

@@ -57,6 +57,23 @@ npm run test:ci      # Karma, ChromeHeadless
 
 The first deploy needs the Hosting site created (`firebase hosting:sites:create todd-market`) and the `market.taliferro.tech` domain connected. `firebase.json` rewrites `/api/**`, `/feeds/**` and `/p/**` to the `marketApi` function, so deploy the backend first.
 
+## End-to-end tests
+
+Two journeys cover a store's whole life: a merchant signs up and imports products, the store is built, gets paid and goes live, a shopper buys, the store ships and delivers, there's an exchange and a return, the referral commission is paid, and the merchant signs out (or deletes the account).
+
+- **API journey (backend):** `npx jest market/__tests__/journey` in `taliferrotech/todd-backend/functions`. It drives the real API with an in-memory Firestore and a fake Stripe, in about a second, and runs with the other backend tests.
+- **Browser journey (this repo):** `npm run e2e`. It builds the `e2e` configuration (signed in as `merchant1`, a stand-in Stripe.js from `cypress/fixtures/fake-stripe.txt`), starts `scripts/serve-e2e.mjs` (the dev API from the backend repo on :5055, plus the build on :4311), and runs `cypress/e2e/01-04` in order:
+  - onboarding
+  - purchase, on desktop and phone
+  - fulfillment and an exchange
+  - sign out
+
+  `deploy.sh` runs it after the unit tests. The backend repo must sit at `../../taliferrotech/todd-backend/functions`, or set `MARKET_BACKEND_DIR`.
+- **Interactive:** `npm run serve:e2e` in one terminal, `npm run cy:open` in another.
+- `cy:run` and `cy:open` unset `ELECTRON_RUN_AS_NODE`. VS Code sets it in its terminals, and it stops Cypress's Electron from starting ("bad option: --no-sandbox").
+
+Neither journey touches real Stripe. Before a big payments change, also do one real purchase on a live test store and refund it from its Stripe Dashboard. That checks the parts the fakes can't: 3D Secure, Apple Pay and Google Pay, and real fees and tax.
+
 ## Decisions that differ from the handoff
 
 - **Checkout:** each store is the merchant of record. One checkout and one card entry, but a separate charge per store, so the copy says "1 checkout" instead of "1 payment". Confirm the wording with Todd.

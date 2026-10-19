@@ -1,0 +1,20 @@
+// A stand-in for https://js.stripe.com/v3 in end-to-end tests: the dev API
+// uses a fake Stripe, so a real card can't be confirmed. Never shipped.
+window.Stripe = function Stripe () {
+  const element = {
+    handlers: {},
+    on ( event, fn ) { this.handlers[event] = fn; },
+    mount ( host ) {
+      const el = typeof host === 'string' ? document.querySelector( host ) : host;
+      if ( el ) el.innerHTML = '<div data-cy="fake-card" style="padding:14px;border-radius:999px;background:#eee">4242 4242 4242 4242 · 12/30 · 123</div>';
+      setTimeout( () => this.handlers.ready && this.handlers.ready(), 50 );
+    },
+    update () {}, destroy () {}, unmount () {},
+  };
+  return {
+    elements: () => ( { create: () => element, getElement: () => element, submit: async () => ( {} ), update () {}, fetchUpdates: async () => ( {} ) } ),
+    confirmSetup: async () => ( { setupIntent: { status: 'succeeded' } } ),
+    handleNextAction: async () => ( {} ),
+    _registerWrapper () {},
+  };
+};

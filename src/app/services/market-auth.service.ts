@@ -9,6 +9,13 @@ import { startAuthentication, startRegistration } from '@simplewebauthn/browser'
 import { environment } from '../../environments/environment';
 import { MarketApiService } from './market-api.service';
 
+const DEV_SIGNED_OUT = 'tm-dev-signed-out';
+
+/** The dev/e2e stand-in user (never in production builds: devAuthUid is empty there). */
+function devUser ( uid: string ): User {
+  return { uid, email: `${ uid }@dev.local`, displayName: uid, getIdToken: async () => `dev:${ uid }` } as unknown as User;
+}
+
 export interface Passkey { id: string; name: string; createdAt: number | null; lastUsedAt: number | null }
 
 /** Who is signing in: a shopper (on a store) or a merchant (on TODD Market). */
@@ -44,9 +51,10 @@ export class MarketAuthService {
       return;
     }
     if ( environment.devAuthUid ) {
-      // Dev only (environment.devauth.ts): a stand-in user for market/dev/server.js.
-      const uid = environment.devAuthUid;
-      const fake = { uid, email: `${ uid }@dev.local`, displayName: uid, getIdToken: async () => `dev:${ uid }` } as unknown as User;
+      // Dev and e2e builds only (environment.devauth.ts / .e2e.ts): a stand-in
+      // user for market/dev/server.js. Signing out sticks for the browser
+      // session, so the sign-out flow can be tested.
+      const fake = this.signedOutInDev() ? null : devUser( environment.devAuthUid );
       this.user.set( fake );
       this.ready = Promise.resolve( fake );
       return;
@@ -111,6 +119,16 @@ export class MarketAuthService {
   }
 
   async signOut (): Promise<void> {
-    if ( this.isBrowser ) await signOut( getAuth() );
+    if ( !this.isBrowser ) return;
+    if ( environment.devAuthUid ) {
+      try { sessionStorage.setItem( DEV_SIGNED_OUT, '1' ); } catch { /* private mode */ }
+      this.user.set( null );
+      return;
+    }
+    await signOut( getAuth() );
+  }
+
+  private signedOutInDev (): boolean {
+    try { return sessionStorage.getItem( DEV_SIGNED_OUT ) === '1'; } catch { return false; }
   }
 }

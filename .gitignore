@@ -8,3 +8,7 @@
 /design_handoff_*/
 /*.zip
 /.firebase/
+
+# Cypress
+/cypress/screenshots/
+/cypress/videos/
