@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { apiErrorMessage } from '../../../services/market-api.service';
 import { Dashboard, LedgerRow, MerchantService, NetworkNode } from '../../../services/merchant.service';
 import { MoneyPipe } from '../../../shared/money.pipe';
+import { shortStoreName } from '../../../shared/short-store-name';
 
 type Filter = 'all' | 'sent' | 'received';
 const SLOTS: [number, number][] = [[282, 102], [128, 104], [138, 222], [270, 228], [86, 166], [320, 166]];
@@ -17,6 +18,7 @@ const SLOTS: [number, number][] = [[282, 102], [128, 104], [138, 222], [270, 228
   styleUrl: './dashboard.component.css',
 } )
 export class DashboardComponent implements OnInit {
+  readonly short = shortStoreName;
   private readonly merchant = inject( MerchantService );
   readonly data = signal<Dashboard | null>( null );
   readonly error = signal( '' );

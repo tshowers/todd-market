@@ -46,7 +46,7 @@
                 @if (!n.blocked) { <path [attr.d]="path(n.x, n.y)" fill="none" stroke="var(--cyan)" [attr.stroke-width]="stroke(n)" stroke-linecap="round" /> }
               }
               <circle cx="200" cy="160" r="34" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
-              <text x="200" y="165" text-anchor="middle" class="me">{{ d.store.name.split(' ')[0] }}</text>
+              <text x="200" y="165" text-anchor="middle" class="me">{{ short(d.store.name) }}</text>
               @for (n of placed(); track n.id) {
                 <g class="node" (click)="selected.set(n.id)" (keydown.enter)="selected.set(n.id)" tabindex="0" role="button" [attr.aria-label]="n.name">
                   <circle [attr.cx]="n.x" [attr.cy]="n.y" r="26" [attr.fill]="isSelected(n.id) ? 'var(--t-blue)' : n.blocked ? 'var(--surface2)' : 'var(--bg)'" stroke="var(--text)" stroke-width="1.5" />

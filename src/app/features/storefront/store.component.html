@@ -140,7 +140,7 @@
             <div class="cards">
               @for (p of ref.items; track p.id) {
                 <article class="card">
-                  <div class="card__img">@if (p.image) { <img [src]="p.image" [alt]="p.title"> }<span class="from"><span class="cyan-dot"></span>From {{ ref.store.name.split(' ')[0] }}</span></div>
+                  <div class="card__img">@if (p.image) { <img [src]="p.image" [alt]="p.title"> }<span class="from"><span class="cyan-dot"></span>From {{ short(ref.store.name) }}</span></div>
                   <strong>{{ p.title }}</strong>
                   <span class="meta">{{ p.priceCents | money }}{{ p.available ? '' : ' · out of stock' }}</span>
                   @if (bag.has(p.id)) { <span class="added">In your bag</span> }

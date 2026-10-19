@@ -59,7 +59,7 @@
 .added { font-size: 13px; font-weight: 600; color: var(--t-green-fg); }
 .add { align-self: flex-start; }
 
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 12px; padding-top: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 12px; padding-top: 6px; }
 .card { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 20px; background: var(--surface); }
 .card__img { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; background: var(--surface2); overflow: hidden; }
 .card__img img { width: 100%; height: 100%; object-fit: cover; }

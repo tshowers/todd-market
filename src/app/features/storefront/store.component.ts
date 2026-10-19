@@ -10,6 +10,7 @@ import { SeoService } from '../../services/seo.service';
 import { StorefrontService } from '../../services/storefront.service';
 import { brandStyle } from '../../shared/brand/brand-tuning';
 import { IconComponent } from '../../shared/icon/icon.component';
+import { shortStoreName } from '../../shared/short-store-name';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { storeAddress } from '../../shared/store-address';
 import { BagDrawerComponent } from './bag-drawer.component';
@@ -63,7 +64,8 @@ export class StoreComponent implements OnInit {
   readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug ) : '' );
   readonly tiles = computed( () => ( this.store()?.quickTiles || [] ).slice( 0, 6 ).map( ( t, i ) => ( { ...t, tint: TILE_TINTS[i % TILE_TINTS.length] } ) ) );
   readonly asked = computed( () => !!this.result() || this.searching() );
-  readonly shortName = computed( () => ( this.store()?.name || '' ).split( /\s+/ )[0].replace( /[’']s$/, '' ) + "'s" );
+  readonly shortName = computed( () => shortStoreName( this.store()?.name || '' ) );
+  readonly short = shortStoreName;
 
   async ngOnInit (): Promise<void> {
     const slug = this.slugOverride() || this.route.snapshot.paramMap.get( 'slug' ) || '';
