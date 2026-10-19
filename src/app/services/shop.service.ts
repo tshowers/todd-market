@@ -15,9 +15,9 @@ export interface NetworkItem extends PublicProduct {
 /** A shop from the Find crawl that isn't on TODD Market: links out, nothing to buy here. */
 export interface Listing {
   domain: string; name: string; url: string; category: string; region: string; city: string;
-  products: { title: string; url: string; imageUrl: string; description: string }[];
+  products: { title: string; url: string; imageUrl: string; description: string; priceCents?: number | null }[];
 }
-export interface ListingItem { id: string; title: string; image: string; url: string; storeName: string; storeDomain: string; storeUrl: string; category: string }
+export interface ListingItem { id: string; title: string; image: string; url: string; storeName: string; storeDomain: string; storeUrl: string; category: string; priceCents?: number | null }
 export interface NetworkResult {
   query: string; bestId: string | null; note: string; items: NetworkItem[]; listingItems?: ListingItem[];
   stores: ( DirectoryStore & { matches: number } )[]; storesSearched: number; ms: number;

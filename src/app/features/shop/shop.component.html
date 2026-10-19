@@ -47,7 +47,7 @@
     <div class="litems"> @for (l of r.listingItems; track l.id) { <div class="litem">
         <a class="lthumb" [href]="l.url" target="_blank" rel="noopener nofollow"><img [src]="l.image" alt="" loading="lazy"></a>
         <span class="lstore">{{ l.storeName }}</span>
-        <strong>{{ l.title }}</strong>
+        <strong>{{ l.title }}</strong>@if (l.priceCents) { <span class="lprice">{{ l.priceCents | money }}</span> }
         <a class="lgo" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their site ↗</a>
         <button type="button" class="want" (click)="interestFor.set({ domain: l.storeDomain, name: l.storeName, url: l.storeUrl, productUrl: l.url, productTitle: l.title })">Want to buy it here?</button>
       </div> } </div>
@@ -57,7 +57,7 @@
     <div class="litems"> @for (l of r.listingItems; track l.id) { <div class="litem">
         <a class="lthumb" [href]="l.url" target="_blank" rel="noopener nofollow"><img [src]="l.image" alt="" loading="lazy"></a>
         <span class="lstore">{{ l.storeName }}</span>
-        <strong>{{ l.title }}</strong>
+        <strong>{{ l.title }}</strong>@if (l.priceCents) { <span class="lprice">{{ l.priceCents | money }}</span> }
         <a class="lgo" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their site ↗</a>
         <button type="button" class="want" (click)="interestFor.set({ domain: l.storeDomain, name: l.storeName, url: l.storeUrl, productUrl: l.url, productTitle: l.title })">Want to buy it here?</button>
       </div> } </div>
