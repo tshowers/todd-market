@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { MerchantStore, ReviewData } from '../../../models/merchant.model';
@@ -25,6 +26,8 @@ export class GetPaidComponent implements OnInit {
   private readonly merchant = inject( MerchantService );
   private readonly route = inject( ActivatedRoute );
   private readonly router = inject( Router );
+  private readonly destroyRef = inject( DestroyRef );
+  private readonly platformId = inject( PLATFORM_ID );
 
   readonly store = signal<MerchantStore | null>( null );
   readonly review = signal<ReviewData | null>( null );
@@ -35,6 +38,13 @@ export class GetPaidComponent implements OnInit {
   readonly error = signal( '' );
 
   readonly accepting = computed( () => !!this.store()?.stripe.chargesEnabled );
+  /** Everything's in and Stripe is checking it: wait, don't send them back to Stripe. */
+  readonly reviewing = computed( () => {
+    const st = this.store()?.stripe;
+    return !!st && st.connected && !!st.detailsSubmitted && !st.chargesEnabled && !st.needsMore;
+  } );
+  /** Stripe asked for more after the first pass. */
+  readonly needsMore = computed( () => !!this.store()?.stripe.needsMore && !this.accepting() );
   readonly payouts = computed( () => !!this.store()?.stripe.payoutsEnabled );
   /** Back from the payouts phase, but Stripe is still verifying. */
   readonly checkingId = computed( () => this.accepting() && !this.payouts() && this.route.snapshot.queryParamMap.get( 'phase' ) === 'payouts' );
@@ -62,6 +72,21 @@ export class GetPaidComponent implements OnInit {
     }
     // The link expired or was reused: make a fresh one and go straight back.
     if ( params.get( 'stripe' ) === 'refresh' ) await this.openStripe( phase );
+    this.watchReview();
+  }
+
+  /** While Stripe reviews, re-check every 30 seconds so Go live turns on by itself. */
+  private watchReview (): void {
+    if ( !isPlatformBrowser( this.platformId ) ) return;
+    const timer = setInterval( async () => {
+      if ( !this.reviewing() ) return clearInterval( timer );
+      try {
+        this.store.set( await this.merchant.syncStripe() );
+      } catch {
+        // Try again on the next tick.
+      }
+    }, 30000 );
+    this.destroyRef.onDestroy( () => clearInterval( timer ) );
   }
 
   async openStripe ( phase: 'accept' | 'payouts' ): Promise<void> {

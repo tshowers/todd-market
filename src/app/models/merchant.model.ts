@@ -43,7 +43,7 @@ export interface MerchantStore {
   shippo?: { available: boolean; connected: boolean };
   settings: StoreSettings;
   stats: { productCount: number; photoCount: number; collectionCount: number; networkCount: number };
-  stripe: { connected: boolean; chargesEnabled: boolean; payoutsEnabled: boolean; bankLast4: string | null; taxStatus: string | null };
+  stripe: { connected: boolean; chargesEnabled: boolean; payoutsEnabled: boolean; bankLast4: string | null; taxStatus: string | null; detailsSubmitted?: boolean; needsMore?: boolean };
 }
 
 export interface CustomDomain { name: string; status: 'pending' | 'active'; records: { type: string; name: string; value: string }[]; checkedAt: number }

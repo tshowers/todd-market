@@ -163,7 +163,13 @@ export class SignInComponent implements OnInit {
       await this.auth.verifyEmailCode( this.email(), this.code().join( '' ) );
       await this.router.navigateByUrl( this.next );
     } catch ( error ) {
-      this.error.set( apiErrorMessage( error, "That code didn't work. Check it, or send a new one." ) );
+      // A Firebase error ("auth/…") means the code was accepted but the browser
+      // couldn't finish; the code is used up, so "check it" would mislead.
+      const firebase = String( ( error as { code?: string } )?.code || '' ).startsWith( 'auth/' );
+      if ( firebase ) console.error( 'Sign-in could not finish', error );
+      this.error.set( firebase
+        ? "Your code worked, but your browser couldn't finish signing in. Reload the page and send a new code. If it happens again, turn off blockers for this site."
+        : apiErrorMessage( error, "That code didn't work. Check it, or send a new one." ) );
     } finally {
       this.busy.set( false );
     }

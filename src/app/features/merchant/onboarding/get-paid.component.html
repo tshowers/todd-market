@@ -3,7 +3,7 @@
   @if (store(); as s) {
     <div class="grid">
       <tm-store-preview [name]="s.name" [address]="address()" [logoUrl]="s.brand.logoUrl" [tuned]="s.brand.tuned" [heroLine]="heroLine()" [collections]="collections()">
-        <span class="status-dot" [class.ready]="accepting()"></span>{{ accepting() ? 'Ready to go live' : 'Waiting on payments' }}
+        <span class="status-dot" [class.ready]="accepting()"></span>{{ accepting() ? 'Ready to go live' : reviewing() ? 'Stripe is reviewing' : 'Waiting on payments' }}
       </tm-store-preview>
 
       <div class="col">
@@ -11,7 +11,7 @@
           <div class="phase__head">
             <span class="num">1</span>
             <div class="phase__title"><strong>Start accepting payments</strong><span>A few minutes · business type, contact details, what you sell</span></div>
-            <span class="tm-tag" [class.tm-tint-blue]="!accepting()" [class.tm-tint-green]="accepting()">{{ accepting() ? 'Done' : 'Needed to go live' }}</span>
+            <span class="tm-tag" [class.tm-tint-blue]="!accepting() && !reviewing()" [class.tm-tint-yellow]="reviewing()" [class.tm-tint-green]="accepting()">{{ accepting() ? 'Done' : reviewing() ? 'Stripe is reviewing' : 'Needed to go live' }}</span>
           </div>
           @if (syncing() === 'accept') {
             <div class="phase__body working"><span class="tm-dot tm-dot--pulse"></span>Finishing up with Stripe…</div>
@@ -20,8 +20,14 @@
               <div><span class="check"><tm-icon name="check" [size]="12" /></span>Business details sent to Stripe</div>
               <div><span class="check"><tm-icon name="check" [size]="12" /></span>Cards, Apple Pay and Google Pay turned on</div>
             </div>
+          } @else if (reviewing()) {
+            <div class="phase__body checks">
+              <div><span class="check"><tm-icon name="check" [size]="12" /></span>Business details sent to Stripe</div>
+              <div><span class="tm-dot tm-dot--pulse"></span>Stripe is verifying them. Usually a few minutes, sometimes up to two business days. This page turns on Go live by itself, and Stripe emails you if it needs anything.</div>
+            </div>
           } @else {
             <div class="phase__body">
+              @if (needsMore()) { <span class="meta">Stripe needs a few more details.</span> }
               <button type="button" class="tm-btn tm-btn--stripe" [disabled]="opening()" (click)="openStripe('accept')">{{ opening() ? 'Opening Stripe…' : 'Continue with Stripe' }}</button>
               <span class="meta">Opens Stripe's secure page, then brings you back here.</span>
             </div>
