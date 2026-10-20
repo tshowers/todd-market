@@ -22,7 +22,7 @@ import { RingIconComponent } from '../../shared/ring-icon/ring-icon.component';
           <h1>Commerce for independent stores, connected to each other.</h1>
           <p class="lead">TODD Market turns a store's catalog into a working storefront, helps shoppers find what they asked for, and links independent stores into a referral network so no shopper leaves empty-handed.</p>
         </div>
-        <div class="icon"><tm-ring-icon class="icon--big" [size]="96" [halo]="true" /><tm-ring-icon class="icon--small" [size]="52" /></div>
+        <div class="icon"><tm-ring-icon class="icon--big" [size]="96" /><tm-ring-icon class="icon--small" [size]="52" /></div>
       </section>
 
       <section class="cards">

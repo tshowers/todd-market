@@ -21,7 +21,7 @@ export type PublicNavKey = 'how' | 'shop' | 'pricing' | 'ios' | 'help' | 'about'
   template: `
     <header class="bar">
       <a class="brand" routerLink="/sell" aria-label="TODD Market for stores">
-        <span class="mark"><tm-ring-icon [size]="24" /></span>
+        <span class="mark"><tm-ring-icon [size]="34" /></span>
         <span class="word">TODD <span>Market</span></span>
       </a>
       <nav class="pills" aria-label="TODD Market">
@@ -45,7 +45,7 @@ export type PublicNavKey = 'how' | 'shop' | 'pricing' | 'ios' | 'help' | 'about'
     .bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 20px 40px; }
     .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; color: var(--text); }
     .brand:hover { color: var(--text); }
-    .mark { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
+    .mark { width: 34px; height: 34px; display: grid; place-items: center; }
     .word { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
     .word span { font-weight: 500; color: var(--muted); }
     .pills { display: flex; gap: 4px; }
