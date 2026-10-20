@@ -75,7 +75,7 @@
         <span class="meta">{{ s.category }}{{ s.city ? ' · ' + s.city : '' }}</span> @if (s.description) { <p>{{ s.description }}</p> } <div class="feats">@for (f of s.features; track f) { <span>{{ f }}</span> }</div>
         <a class="tm-btn visit" [href]="storeLink(s)">Visit store →</a>
       </div>
-    </article> } </div> @if (filteredStores().length > shown()) { <button type="button" class="tm-btn tm-btn--lg more" (click)="shown.set(shown() + 24)">Show more stores</button> } } @else if (!loadingStores()) { <div class="none">{{ category() === 'All' ? 'New stores are joining the network.' : 'No stores in this category yet.' }} <button type="button" class="link" (click)="setView('search')">Try searching every store instead.</button></div> } @if (filteredListings().length) { <section class="more">
+    </article> } </div> @if (filteredStores().length > shown()) { <button type="button" class="tm-btn tm-btn--lg more-btn" (click)="shown.set(shown() + 24)">Show more stores</button> } } @else if (!loadingStores()) { <div class="none">{{ category() === 'All' ? 'New stores are joining the network.' : 'No stores in this category yet.' }} <button type="button" class="link" (click)="setView('search')">Try searching every store instead.</button></div> } @if (filteredListings().length) { <section class="more">
     <div class="more-head"><strong>More local shops</strong><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
     <div class="listings"> @for (l of filteredListings().slice(0, listingsShown()); track l.domain) { <article class="listing">
         <div class="lpics">@for (p of l.products.slice(0, 3); track p.url) { <img [src]="p.imageUrl" alt="" loading="lazy"> }</div>
