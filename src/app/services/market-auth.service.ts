@@ -42,26 +42,41 @@ export class MarketAuthService {
   /** undefined while Firebase restores the session; null when signed out. */
   readonly user = signal<User | null | undefined>( undefined );
   readonly isSignedIn = computed( () => !!this.user() );
-  readonly ready: Promise<User | null>;
+  /** Settles once Firebase has restored the session from the last visit. */
+  private readonly restored: Promise<unknown>;
+
+  /**
+   * The signed-in user, once the session is restored. It reads who is signed
+   * in now, every time: a promise made when the page loaded would still say
+   * "signed out" after signing in on this page, and the guard would send the
+   * shopper straight back to sign in.
+   */
+  get ready (): Promise<User | null> {
+    return this.restored.then( () => this.currentUser() );
+  }
 
   constructor () {
     if ( !this.isBrowser ) {
       this.user.set( null );
-      this.ready = Promise.resolve( null );
+      this.restored = Promise.resolve();
       return;
     }
     if ( environment.devAuthUid ) {
       // Dev and e2e builds only (environment.devauth.ts / .e2e.ts): a stand-in
       // user for market/dev/server.js. Signing out sticks for the browser
       // session, so the sign-out flow can be tested.
-      const fake = this.signedOutInDev() ? null : devUser( environment.devAuthUid );
-      this.user.set( fake );
-      this.ready = Promise.resolve( fake );
+      this.user.set( this.signedOutInDev() ? null : devUser( environment.devAuthUid ) );
+      this.restored = Promise.resolve();
       return;
     }
     const auth = getAuth();
-    this.ready = auth.authStateReady().then( () => auth.currentUser );
+    this.restored = auth.authStateReady();
     onAuthStateChanged( auth, ( user ) => this.user.set( user ) );
+  }
+
+  private currentUser (): User | null {
+    if ( !this.isBrowser || environment.devAuthUid ) return this.user() ?? null;
+    return getAuth().currentUser;
   }
 
   async signInWithGoogle (): Promise<void> {

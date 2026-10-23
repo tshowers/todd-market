@@ -41,6 +41,8 @@ export class SignInComponent implements OnInit {
   readonly emailError = signal( false );
   readonly code = signal<string[]>( ['', '', '', '', '', ''] );
   readonly busy = signal( false );
+  /** The code was accepted: it's used up, so it can't be sent again. */
+  readonly signedIn = signal( false );
   readonly error = signal( '' );
   readonly store = signal<StoreHeader | null>( null );
   private storeSlug = '';
@@ -93,7 +95,7 @@ export class SignInComponent implements OnInit {
     this.error.set( '' );
     try {
       await this.auth.signInWithPasskey();
-      await this.router.navigateByUrl( this.next );
+      await this.finish();
     } catch ( error ) {
       // Closing the system sheet isn't an error worth showing.
       if ( ( error as { name?: string } )?.name === 'NotAllowedError' ) return;
@@ -105,7 +107,7 @@ export class SignInComponent implements OnInit {
     this.error.set( '' );
     try {
       await ( provider === 'apple' ? this.auth.signInWithApple() : this.auth.signInWithGoogle() );
-      await this.router.navigateByUrl( this.next );
+      await this.finish();
     } catch ( error ) {
       const code = ( error as { code?: string } )?.code || '';
       if ( code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request' ) {
@@ -126,6 +128,7 @@ export class SignInComponent implements OnInit {
       await this.auth.requestEmailCode( email, this.mode(), this.next, this.storeSlug || undefined );
       this.email.set( email );
       this.code.set( ['', '', '', '', '', ''] );
+      this.signedIn.set( false );
       this.step.set( 'sent' );
       setTimeout( () => this.cells()[0]?.nativeElement.focus(), 0 );
     } catch ( error ) {
@@ -158,12 +161,13 @@ export class SignInComponent implements OnInit {
   }
 
   async verify (): Promise<void> {
-    if ( !this.codeComplete() || this.busy() ) return;
+    if ( !this.codeComplete() || this.busy() || this.signedIn() ) return;
     this.busy.set( true );
     this.error.set( '' );
     try {
       await this.auth.verifyEmailCode( this.email(), this.code().join( '' ) );
-      await this.router.navigateByUrl( this.next );
+      this.signedIn.set( true );
+      await this.finish();
     } catch ( error ) {
       // A Firebase error ("auth/…") means the code was accepted but the browser
       // couldn't finish; the code is used up, so "check it" would mislead.
@@ -175,6 +179,16 @@ export class SignInComponent implements OnInit {
     } finally {
       this.busy.set( false );
     }
+  }
+
+  /**
+   * Signed in: on to where they were going. If the app doesn't get there
+   * (an old tab, a guard that hasn't caught up), a full page load does,
+   * since Firebase keeps the session.
+   */
+  private async finish (): Promise<void> {
+    const moved = await this.router.navigateByUrl( this.next ).catch( () => false );
+    if ( !moved || this.router.url.startsWith( '/sign-in' ) ) window.location.assign( this.next );
   }
 
   useDifferentEmail (): void {

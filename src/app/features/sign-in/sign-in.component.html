@@ -57,7 +57,7 @@
       </div>
       @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
       <div class="actions">
-        <button type="button" class="tm-btn tm-btn--primary tm-btn--lg" [disabled]="!codeComplete() || busy()" (click)="verify()">{{ busy() ? 'Signing in…' : 'Continue' }}</button>
+        <button type="button" class="tm-btn tm-btn--primary tm-btn--lg" [disabled]="!codeComplete() || busy() || signedIn()" (click)="verify()">{{ busy() || signedIn() ? 'Signing in…' : 'Continue' }}</button>
         <button type="button" class="tm-btn tm-btn--lg" (click)="useDifferentEmail()">Use a different email</button>
       </div>
     }
