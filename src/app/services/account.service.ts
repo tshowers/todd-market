@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Address, QuotePart } from './checkout.service';
 import { MarketApiService } from './market-api.service';
 
+export interface SavedItem { storeId: string; productId: string; title: string; storeName: string; storeSlug: string; image: string | null }
 export interface AccountOrder { id: string; paidAt: number; totalCents: number; stores: string[]; status: 'in_progress' | 'delivered' | 'refunded'; image: string | null }
 export interface ReturnableItem { productId: string; variantId: string | null; title: string; variantTitle: string; priceCents: number; quantity: number; image: string | null; swaps: { variantId: string; title: string }[] }
 export interface OrderDetailPart extends QuotePart {
@@ -21,7 +22,8 @@ export class AccountService {
   orders (): Promise<{ orders: AccountOrder[] }> { return this.api.get( '/account/orders' ); }
   order ( id: string ): Promise<OrderDetail> { return this.api.get( `/account/orders/${ encodeURIComponent( id ) }` ); }
   startReturn ( orderId: string, body: unknown ): Promise<StartedReturn> { return this.api.post( `/account/orders/${ encodeURIComponent( orderId ) }/returns`, body ); }
-  profile (): Promise<{ email: string; name: string; addresses: Address[]; saved: { storeId: string; productId: string; title: string; storeName: string; storeSlug: string; image: string | null }[] }> { return this.api.get( '/account/profile' ); }
+  profile (): Promise<{ email: string; name: string; addresses: Address[]; saved: SavedItem[] }> { return this.api.get( '/account/profile' ); }
+  saveSaved ( saved: SavedItem[] ): Promise<{ saved: SavedItem[] }> { return this.api.put( '/account/saved', { saved } ); }
   saveAddresses ( addresses: Address[] ): Promise<{ addresses: Address[] }> { return this.api.put( '/account/addresses', { addresses } ); }
   paymentMethods (): Promise<{ methods: { id: string; brand: string; last4: string; expMonth: number; expYear: number }[] }> { return this.api.get( '/account/payment-methods' ); }
   removePaymentMethod ( id: string ): Promise<unknown> { return this.api.delete( `/account/payment-methods/${ encodeURIComponent( id ) }` ); }

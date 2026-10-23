@@ -16,6 +16,19 @@ describe( 'Shopper: find and buy', () => {
     } );
   } );
 
+  it( 'the home page: example searches, categories, Featured, and a category opens its products', () => {
+    cy.visit( '/linen-loom' );
+    cy.get( '.chips .chip' ).should( 'have.length.at.least', 1 );
+    cy.contains( 'h2', 'Shop by category' );
+    cy.contains( 'h2', /^(Featured|Best sellers)$/ );
+    cy.get( '.grid .prod' ).should( 'have.length.at.least', 3 );
+    // The e2e build is signed in, so the account pill reads Orders (Sign in when signed out).
+    cy.get( 'header.top a.acct' ).should( 'contain', 'Orders' ).and( 'have.attr', 'href', '/account' );
+    cy.get( '.cats .cat' ).first().click();
+    cy.location( 'search' ).should( 'include', 'view=all' );
+    cy.get( 'main.browse .prod' ).should( 'have.length.at.least', 1 );
+  } );
+
   it( 'searches the store, bags a shirt and checks out', () => {
     cy.visit( '/linen-loom' );
     findAndBag( 'linen shirt', 'Linen shirt' );
@@ -41,9 +54,11 @@ describe( 'Shopper: find and buy', () => {
     cy.viewport( 375, 812 );
     cy.visit( '/linen-loom' );
     findAndBag( 'ceramic mug', 'Ceramic mug' );
-    // On a phone the bag is in the bottom tab bar (design: Shop · Search · Bag · Account).
-    cy.get( 'nav.tabbar' ).contains( 'button', 'Bag · 1' ).click();
+    // Mobile web has no tab bar: the bag stays in the top bar, next to Sign in.
+    cy.get( 'header.bar a.acct' ).should( 'be.visible' );
+    cy.get( 'header.bar button.bag-pill' ).should( 'contain', '1' ).click();
     cy.contains( 'a', 'Check out' ).should( 'be.visible' );
+    cy.get( 'header.bar button.bag-pill' ).then( ( el ) => expect( el[0].getBoundingClientRect().right ).to.be.at.most( 375 ) );
     cy.document().then( ( doc ) => expect( doc.documentElement.scrollWidth ).to.be.at.most( 375 ) );
   } );
 } );

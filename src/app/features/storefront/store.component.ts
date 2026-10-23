@@ -1,17 +1,21 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, input, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { Look, PublicProduct, PublicStore, SearchResult } from '../../models/storefront.model';
+import { environment } from '../../../environments/environment';
+import { BrowseResult, Look, ProductCard, PublicProduct, PublicStore, SearchResult, StoreHome } from '../../models/storefront.model';
 import { BagService } from '../../services/bag.service';
 import { apiErrorMessage } from '../../services/market-api.service';
 import { MarketAuthService } from '../../services/market-auth.service';
+import { SavedService } from '../../services/saved.service';
 import { SeoService } from '../../services/seo.service';
 import { StorefrontService } from '../../services/storefront.service';
 import { brandStyle } from '../../shared/brand/brand-tuning';
 import { IconComponent } from '../../shared/icon/icon.component';
 import { shortStoreName, storePossessive } from '../../shared/short-store-name';
 import { MoneyPipe } from '../../shared/money.pipe';
+import { policySentence } from '../../shared/return-policy';
 import { storeAddress } from '../../shared/store-address';
 import { BagDrawerComponent } from './bag-drawer.component';
 
@@ -20,14 +24,17 @@ const RATINGS = [{ key: 'excellent', label: 'Excellent' }, { key: 'good', label:
 
 /**
  * A store's Find-style storefront (§2, §3): home, intent search, looks,
- * referral variant C (shared bag), and the bag.
+ * referral variant C (shared bag), and the bag. The home page below the
+ * search (categories, best sellers, the owner's section, trust strip) is
+ * design_handoff_todd_market_storefront; "All products" and "See all" open
+ * the browse view.
  */
 @Component( {
   selector: 'tm-store',
   standalone: true,
-  imports: [FormsModule, RouterLink, IconComponent, MoneyPipe, BagDrawerComponent],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, IconComponent, MoneyPipe, BagDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'tt-page' },
+  host: { class: 'tt-page', '(window:scroll)': 'onScroll()' },
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
 } )
@@ -38,10 +45,18 @@ export class StoreComponent implements OnInit {
   private readonly seo = inject( SeoService );
   readonly bag = inject( BagService );
   readonly auth = inject( MarketAuthService );
+  readonly saved = inject( SavedService );
 
   /** Set when the store is shown on its own domain at "/" (RootComponent). */
   readonly slugOverride = input<string | null>( null );
   readonly store = signal<PublicStore | null>( null );
+  readonly homeData = signal<StoreHome | null>( null );
+  /** "All products", a category, or "See all" (?view=all&category=&sort=). */
+  readonly browsing = signal<( BrowseResult & { category: string | null; sort: 'best' | 'new' } ) | null>( null );
+  readonly browseLoading = signal( false );
+  /** Phones: the hero search has scrolled away, so the compact bar shows. */
+  readonly compact = signal( false );
+  private readonly heroSearch = viewChild<ElementRef<HTMLElement>>( 'heroSearch' );
   readonly notFound = signal( false );
   readonly query = signal( '' );
   readonly result = signal<SearchResult | null>( null );
@@ -62,8 +77,12 @@ export class StoreComponent implements OnInit {
   readonly style = computed( () => brandStyle( this.store()?.brand.tuned ) );
   readonly initial = computed( () => ( this.store()?.name || '' ).charAt( 0 ).toUpperCase() );
   readonly address = computed( () => this.store() ? storeAddress( this.store()!.slug ) : '' );
-  readonly tiles = computed( () => ( this.store()?.quickTiles || [] ).slice( 0, 6 ).map( ( t, i ) => ( { ...t, tint: TILE_TINTS[i % TILE_TINTS.length] } ) ) );
   readonly asked = computed( () => !!this.result() || this.searching() );
+  /** Off the home page: search results or the browse view. */
+  readonly inner = computed( () => this.asked() || !!this.browsing() || this.browseLoading() );
+  readonly policy = computed( () => policySentence( this.store()?.returns ) );
+  readonly platformUrl = environment.PLATFORM_URL;
+  readonly signInParams = computed( () => ( { as: 'shopper', store: this.store()?.slug || '', next: '/account' } ) );
   readonly shortName = computed( () => shortStoreName( this.store()?.name || '' ) );
   readonly short = shortStoreName;
   readonly possessive = storePossessive;
@@ -71,8 +90,9 @@ export class StoreComponent implements OnInit {
   async ngOnInit (): Promise<void> {
     const slug = this.slugOverride() || this.route.snapshot.paramMap.get( 'slug' ) || '';
     try {
-      const store = await this.api.store( slug );
+      const { home, ...store } = await this.api.home( slug );
       this.store.set( store );
+      this.homeData.set( home );
       this.seo.set( { title: `${ store.name } | TODD Market`, description: store.heroLine || `Shop ${ store.name } on TODD Market.`, path: `/${ store.slug }` } );
       this.seo.setJsonLd( 'store-jsonld', {
         '@context': 'https://schema.org', '@type': 'Store', name: store.name, url: `https://${ this.address() }`,
@@ -82,8 +102,72 @@ export class StoreComponent implements OnInit {
       this.notFound.set( true );
       return;
     }
-    const q = this.route.snapshot.queryParamMap.get( 'q' );
+    void this.saved.load();
+    const params = this.route.snapshot.queryParamMap;
+    const q = params.get( 'q' );
+    const productId = params.get( 'product' );
     if ( q ) await this.ask( q );
+    else if ( params.get( 'view' ) === 'all' ) await this.browse( params.get( 'category' ), params.get( 'sort' ) === 'new' ? 'new' : 'best' );
+    // A saved item (Account → Saved): find it here.
+    else if ( productId ) {
+      const product = await this.api.product( slug, productId ).catch( () => null );
+      if ( product ) await this.ask( product.title );
+    }
+  }
+
+  tint ( i: number ): string {
+    return TILE_TINTS[i % TILE_TINTS.length];
+  }
+
+  onScroll (): void {
+    const hero = this.heroSearch()?.nativeElement;
+    this.compact.set( !!hero && !this.inner() && hero.getBoundingClientRect().bottom < 0 );
+  }
+
+  /** A category tile: counts the tap (it ranks the categories), then shows the category. */
+  openCategory ( id: string ): void {
+    const store = this.store();
+    if ( store ) void this.api.tap( store.slug, id ).catch( () => undefined );
+    void this.browse( id );
+  }
+
+  async browse ( category: string | null = null, sort: 'best' | 'new' = 'best' ): Promise<void> {
+    const store = this.store();
+    if ( !store ) return;
+    this.result.set( null );
+    this.error.set( '' );
+    this.browseLoading.set( true );
+    this.compact.set( false );
+    void this.router.navigate( [], { queryParams: { view: 'all', category: category || null, sort: sort === 'new' ? 'new' : null }, replaceUrl: true } );
+    try {
+      this.browsing.set( { ...await this.api.browse( store.slug, { category, sort } ), category, sort } );
+    } catch ( error ) {
+      this.browsing.set( null );
+      this.error.set( apiErrorMessage( error, "We couldn't load those products. Try again." ) );
+    } finally {
+      this.browseLoading.set( false );
+    }
+    if ( typeof window !== 'undefined' ) window.scrollTo( { top: 0 } );
+  }
+
+  /** A product card: search for it, which shows it with what goes with it. */
+  openProduct ( card: ProductCard ): void {
+    void this.ask( card.title );
+  }
+
+  isSaved ( card: ProductCard ): boolean {
+    return this.saved.has( this.store()?.id || '', card.id );
+  }
+
+  /** The heart: saving needs an account, so signed-out shoppers sign in first and come back here. */
+  toggleSave ( card: ProductCard ): void {
+    const store = this.store();
+    if ( !store ) return;
+    if ( !this.auth.isSignedIn() ) {
+      void this.router.navigate( ['/sign-in'], { queryParams: { as: 'shopper', store: store.slug, next: this.router.url } } );
+      return;
+    }
+    void this.saved.toggle( { storeId: store.id, productId: card.id, title: card.title, storeName: store.name, storeSlug: store.slug, image: card.image } );
   }
 
   async ask ( text?: string ): Promise<void> {
@@ -91,6 +175,8 @@ export class StoreComponent implements OnInit {
     const store = this.store();
     if ( !q || !store ) return;
     this.query.set( q );
+    this.browsing.set( null );
+    this.compact.set( false );
     this.searching.set( true );
     this.error.set( '' );
     this.rating.set( '' );
@@ -107,6 +193,7 @@ export class StoreComponent implements OnInit {
 
   home (): void {
     this.result.set( null );
+    this.browsing.set( null );
     this.query.set( '' );
     this.error.set( '' );
     void this.router.navigate( [], { queryParams: {}, replaceUrl: true } );

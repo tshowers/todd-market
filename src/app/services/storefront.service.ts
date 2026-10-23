@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { PublicProduct, PublicStore, SearchResult } from '../models/storefront.model';
+import { BrowseResult, PublicProduct, PublicStore, SearchResult, StoreWithHome } from '../models/storefront.model';
 import { MarketApiService } from './market-api.service';
 
 /** The public storefront calls. */
@@ -10,6 +10,20 @@ export class StorefrontService {
 
   store ( slug: string ): Promise<PublicStore> {
     return this.api.get( `/storefront/${ encodeURIComponent( slug ) }` );
+  }
+
+  /** The home page in one request: the store, plus categories, best sellers and the rest. */
+  home ( slug: string ): Promise<StoreWithHome> {
+    return this.api.get( `/storefront/${ encodeURIComponent( slug ) }/home` );
+  }
+
+  browse ( slug: string, opts: { category?: string | null; sort?: 'best' | 'new' } = {} ): Promise<BrowseResult> {
+    return this.api.get( `/storefront/${ encodeURIComponent( slug ) }/browse`, { category: opts.category || undefined, sort: opts.sort === 'new' ? 'new' : undefined } );
+  }
+
+  /** A category tap, which ranks the categories on the home page. */
+  tap ( slug: string, categoryId: string ): Promise<unknown> {
+    return this.api.post( `/storefront/${ encodeURIComponent( slug ) }/taps`, { categoryId } );
   }
 
   search ( slug: string, query: string ): Promise<SearchResult> {

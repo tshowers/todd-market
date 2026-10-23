@@ -16,6 +16,26 @@ export interface PublicStore {
   location: string;
 }
 
+/** A product as a card on the store home page (no reviews yet: rating stays null). */
+export interface ProductCard { id: string; title: string; priceCents: number; image: string | null; available: boolean; rating: number | null; reviewCount: number }
+
+/** Everything below the search on the store home page (GET /storefront/:slug/home). */
+export interface StoreHome {
+  searchPlaceholder: string;
+  exampleSearches: string[];
+  categories: { id: string; name: string; count: number; image: string | null }[];
+  moreCategories: boolean;
+  bestSellers: { title: string; products: ProductCard[] };
+  section: { type: 'new' | 'gifts' | 'collection'; title: string; collectionId: string | null; products: ProductCard[] } | null;
+  trust: { freeShippingOverCents?: number; returnsDays?: number; location?: string; rating?: number; reviewCount?: number };
+  contactEmail: string | null;
+}
+
+export interface StoreWithHome extends PublicStore { home: StoreHome }
+
+/** "All products", a category, or "See all". */
+export interface BrowseResult { title: string; products: ProductCard[] }
+
 export interface Variant { id: string; title: string; priceCents: number | null; available: boolean; options: Record<string, string> }
 
 export interface PublicProduct {

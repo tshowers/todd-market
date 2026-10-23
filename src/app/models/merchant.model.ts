@@ -55,6 +55,22 @@ export interface StoreSettings {
   returns: { windowDays: number; shopperPaysShipping: boolean; returnShippingCents: number; finalSaleCategories: string[]; requireTags: boolean; parcel?: Parcel | null };
   tax: { auto: boolean; pricesIncludeTax: boolean };
   shipping: { rates: ShippingRate[]; freeOverCents: number | null };
+  /** The store home page below the search; missing until the owner changes it. */
+  home?: HomeSettings;
+}
+
+export interface HomeSettings {
+  /** Up to 4; empty means suggested from the catalog each week. */
+  exampleSearches: string[];
+  section: 'new' | 'gifts' | 'collection' | 'off';
+  sectionCollectionId: string | null;
+  /** collectionId → productId whose photo the category tile shows. */
+  categoryImages: Record<string, string>;
+}
+
+export interface HomeOptions {
+  collections: { id: string; name: string; products: { id: string; title: string; image: string }[] }[];
+  automaticSearches: string[];
 }
 
 export interface BuildStep { label: string; detail: string; state: 'pending' | 'active' | 'done' | 'failed' }

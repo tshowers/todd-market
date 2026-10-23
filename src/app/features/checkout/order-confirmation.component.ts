@@ -40,8 +40,10 @@ const STAGE_INDEX: Record<string, number> = { received: 0, preparing: 1, shipped
         </div>
         <div class="actions">
           @if (auth.isSignedIn()) { <a class="tm-btn tm-btn--primary tm-btn--lg" [routerLink]="['/account/orders', o.id]">View order</a> }
+          @else { <a class="tm-btn tm-btn--primary tm-btn--lg" routerLink="/sign-in" [queryParams]="{ as: 'shopper', store: o.parts[0].storeSlug, email: o.email, next: '/account/orders/' + o.id }">Track this order</a> }
           <a class="tm-btn tm-btn--lg" [routerLink]="['/', o.parts[0].storeSlug]">Keep shopping</a>
         </div>
+        @if (!auth.isSignedIn()) { <p class="guest">Sign in with {{ o.email }} to see this order, its tracking and returns any time. We'll email you a code, no password.</p> }
       } @else if (error()) {
         <p class="tm-error" role="alert">{{ error() }}</p>
       } @else {
@@ -67,6 +69,7 @@ const STAGE_INDEX: Record<string, number> = { received: 0, preparing: 1, shipped
     .paid { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; border-radius: 16px; background: var(--surface); font-size: 14px; }
     .paid span:last-child:not(:first-child) { color: var(--muted); }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .guest { font-size: 14px; color: var(--muted); }
     @media (max-width: 600px) { .page { padding: 28px 18px; } h1 { font-size: 32px; } }
   `],
 } )

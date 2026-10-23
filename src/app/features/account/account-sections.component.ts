@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { AccountService } from '../../services/account.service';
+import { AccountService, SavedItem } from '../../services/account.service';
 import { Address } from '../../services/checkout.service';
 import { apiErrorMessage } from '../../services/market-api.service';
 import { MarketAuthService, Passkey } from '../../services/market-auth.service';
@@ -83,7 +83,7 @@ export class AccountSectionsComponent implements OnInit {
   readonly busy = signal( false );
   readonly notice = signal( '' );
   readonly section = signal<Section>( 'saved' );
-  readonly saved = signal<{ storeId: string; productId: string; title: string; storeName: string; storeSlug: string; image: string | null }[]>( [] );
+  readonly saved = signal<SavedItem[]>( [] );
   readonly addresses = signal<Address[]>( [] );
   readonly methods = signal<{ id: string; brand: string; last4: string; expMonth: number; expYear: number }[]>( [] );
   readonly error = signal( '' );

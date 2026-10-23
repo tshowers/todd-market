@@ -63,6 +63,8 @@ export class SignInComponent implements OnInit {
     this.mode.set( params.get( 'as' ) === 'shopper' ? 'shopper' : 'merchant' );
     this.next = safeNext( params.get( 'next' ) ) || ( this.mode() === 'shopper' ? '/account' : '/app' );
     this.storeSlug = params.get( 'store' ) || '';
+    // "Track this order" after a guest checkout: the order's email, ready to send a code.
+    if ( !this.route.snapshot.data['verify'] ) this.email.set( ( params.get( 'email' ) || '' ).slice( 0, 200 ) );
     if ( this.storeSlug ) void this.loadStore();
 
     // The emailed link: /sign-in/verify?email=…&code=…

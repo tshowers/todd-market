@@ -2,20 +2,20 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { CustomDomain, MerchantStore, ShippingRate, StoreSettings } from '../../../models/merchant.model';
+import { CustomDomain, HomeOptions, HomeSettings, MerchantStore, ShippingRate, StoreSettings } from '../../../models/merchant.model';
 import { apiErrorMessage } from '../../../services/market-api.service';
 import { MerchantService, TaxRegistration } from '../../../services/merchant.service';
 import { MoneyPipe } from '../../../shared/money.pipe';
 import { policySentence } from '../../../shared/return-policy';
 
-type Tab = 'store' | 'returns' | 'tax' | 'shipping';
+type Tab = 'store' | 'home' | 'returns' | 'tax' | 'shipping';
 interface Draft { name: string; slug: string; directoryCategory: string; settings: StoreSettings }
 
 const US_STATES: [string, string][] = Object.entries( {
   AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
 } );
 
-/** Merchant settings (f14–f17, m20): Store · Returns · Tax · Shipping, saved together. */
+/** Merchant settings (f14–f17, m20): Store · Home page · Returns · Tax · Shipping, saved together. */
 @Component( {
   selector: 'tm-settings',
   standalone: true,
@@ -30,10 +30,14 @@ export class SettingsComponent implements OnInit {
   private readonly router = inject( Router );
 
   readonly tabs: { key: Tab; label: string }[] = [
-    { key: 'store', label: 'Store' }, { key: 'returns', label: 'Returns' }, { key: 'tax', label: 'Tax' }, { key: 'shipping', label: 'Shipping' },
+    { key: 'store', label: 'Store' }, { key: 'home', label: 'Home page' }, { key: 'returns', label: 'Returns' }, { key: 'tax', label: 'Tax' }, { key: 'shipping', label: 'Shipping' },
   ];
   readonly windows = [{ days: 14, label: '14 days' }, { days: 30, label: '30 days' }, { days: 60, label: '60 days' }, { days: 0, label: 'No returns' }];
   readonly states = US_STATES;
+  readonly searchSlots = [0, 1, 2, 3];
+  readonly homeOptions = signal<HomeOptions | null>( null );
+  /** The home page settings, with the defaults the storefront uses until the owner changes them. */
+  readonly home = computed<HomeSettings>( () => ( { exampleSearches: [], section: 'new', sectionCollectionId: null, categoryImages: {}, ...( this.draft()?.settings.home || {} ) } ) );
 
   readonly tab = signal<Tab>( 'store' );
   readonly store = signal<MerchantStore | null>( null );
@@ -65,6 +69,7 @@ export class SettingsComponent implements OnInit {
       this.directoryCategories.set( categories );
       this.domain.set( store.customDomain );
       this.taxStates.set( taxRegistrations );
+      void this.merchant.homeOptions().then( ( o ) => this.homeOptions.set( o ) ).catch( () => undefined );
       const review = await this.merchant.review().catch( () => null );
       this.categories.set( ( review?.collections || [] ).map( ( c ) => c.name ) );
     } catch ( error ) {
@@ -79,6 +84,24 @@ export class SettingsComponent implements OnInit {
   patch<K extends keyof StoreSettings> ( section: K, value: Partial<StoreSettings[K]> ): void {
     this.draft.update( ( d ) => d ? { ...d, settings: { ...d.settings, [section]: { ...d.settings[section], ...value } } } : d );
     this.savedNote.set( false );
+  }
+
+  setHome ( value: Partial<HomeSettings> ): void {
+    this.patch( 'home', { ...this.home(), ...value } );
+  }
+
+  setSearch ( index: number, value: string ): void {
+    const list = [...this.home().exampleSearches];
+    while ( list.length < 4 ) list.push( '' );
+    list[index] = value;
+    this.setHome( { exampleSearches: list } );
+  }
+
+  pickImage ( collectionId: string, productId: string ): void {
+    const images = { ...this.home().categoryImages };
+    if ( productId ) images[collectionId] = productId;
+    else delete images[collectionId];
+    this.setHome( { categoryImages: images } );
   }
 
   setTop ( key: 'name' | 'slug' | 'directoryCategory', value: string ): void {

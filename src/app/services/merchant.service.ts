@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { BuildJob, CustomDomain, MerchantStore, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
+import { BuildJob, CustomDomain, HomeOptions, MerchantStore, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
 
 export interface LedgerRow {
   id: string; direction: 'sent' | 'received'; store: string; item: string; date: number; saleCents: number; commissionCents: number;
@@ -156,6 +156,11 @@ export class MerchantService {
 
   disconnectDomain (): Promise<unknown> {
     return this.api.delete( '/merchant/settings/domain' );
+  }
+
+  /** Settings → Home page: collections with photos to pick from, and the suggested example searches. */
+  homeOptions (): Promise<HomeOptions> {
+    return this.api.get( '/merchant/settings/home' );
   }
 
   settings (): Promise<{ store: MerchantStore; categories: string[]; policy: string; taxRegistrations: TaxRegistration[] }> {

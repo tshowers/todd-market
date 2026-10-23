@@ -2,31 +2,108 @@
   <div class="shop tm-branded" [style]="style()">
     @if (s.isSample) { <div class="sample">This is a sample store to show how TODD Market works. Checkout is turned off.</div> }
 
-    @if (!asked()) {
-      <!-- Home (d08, m04) -->
-      <header class="top"><span></span>
-        <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+    @if (!inner()) {
+      @if (homeData(); as h) {
+      <!-- Home (design_handoff_todd_market_storefront 1a–1e) -->
+      <header class="top">
+        <span class="top__brand"><span class="tm-store-mark mark-md">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span><span class="top__name">{{ s.name }}</span></span>
+        <span class="top__actions">
+          <ng-container *ngTemplateOutlet="accountPill" />
+          <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+        </span>
       </header>
+      @if (compact()) {
+        <div class="compact">
+          <span class="tm-store-mark mark-xs">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
+          <form class="pill" (ngSubmit)="ask()" role="search">
+            <tm-icon name="search" [size]="16" /><input name="qc" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Describe what you need" aria-label="Search this store" autocomplete="off">
+          </form>
+        </div>
+      }
       <main class="home">
-        <span class="tm-store-mark mark-lg">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
-        <h1 class="name">{{ s.name }}</h1>
-        <p class="lead">{{ s.heroLine || "Describe what you need. We'll put it together and explain the options." }}</p>
-        <form class="search" (ngSubmit)="ask()" role="search">
-          <label class="search__field"><tm-icon name="search" [size]="18" />
-            <input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Describe what you need" aria-label="Describe what you need" autocomplete="off"></label>
-          <button type="submit" class="tm-btn tm-btn--primary find">Find</button>
-        </form>
-        <p class="hint">Describe what you need. We'll put it together and explain the options.</p>
-        @if (tiles().length) {
-          <div class="tiles">
-            @for (t of tiles(); track t.label) {
-              <button type="button" class="tile" [class]="'tm-tint-' + t.tint" (click)="ask(t.query)">{{ t.label }}</button>
-            }
-          </div>
+        <section class="hero">
+          <span class="tm-store-mark mark-lg">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
+          <h1 class="name">{{ s.name }}</h1>
+          <p class="lead">{{ s.heroLine || "Describe what you need. We'll put it together and explain the options." }}</p>
+          <form #heroSearch class="search" (ngSubmit)="ask()" role="search">
+            <label class="search__field"><tm-icon name="search" [size]="18" />
+              <input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" [placeholder]="h.searchPlaceholder" aria-label="Describe what you need" autocomplete="off"></label>
+            <button type="submit" class="tm-btn tm-btn--primary find">Find</button>
+          </form>
+          @if (h.exampleSearches.length) {
+            <div class="chips" role="group" aria-label="Example searches">
+              <span class="chips__try">Try</span>
+              @for (c of h.exampleSearches; track c) { <button type="button" class="chip" (click)="ask(c)">{{ c }}</button> }
+            </div>
+          }
+        </section>
+
+        @if (s.productCount === 0) {
+          <p class="empty">Products are on the way.</p>
+        } @else {
+          @if (h.categories.length) {
+            <section class="block" aria-labelledby="cat-h">
+              <div class="block__head"><h2 id="cat-h"><span class="wide">Shop by category</span><span class="narrow">Categories</span></h2><button type="button" class="more" (click)="browse()"><span class="wide">All products</span><span class="narrow">All</span><tm-icon name="chevron-right" [size]="16" /></button></div>
+              <div class="cats">
+                @for (c of h.categories; track c.id; let i = $index) {
+                  <button type="button" class="cat" (click)="openCategory(c.id)">
+                    <span class="cat__img" [class]="'tm-tint-' + tint(i)">@if (c.image) { <img [src]="c.image" alt=""> } @else { <tm-icon name="shopping-bag" [size]="34" /> }</span>
+                    <strong>{{ c.name }}</strong>
+                    <span class="cat__count">{{ c.count ? c.count + (c.count === 1 ? ' item' : ' items') : 'Made to order' }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+          }
+
+          <section class="block" aria-labelledby="best-h">
+            <div class="block__head"><h2 id="best-h">{{ h.bestSellers.title }}</h2><button type="button" class="more" (click)="browse(null, h.bestSellers.title === 'Featured' ? 'new' : 'best')">See all<tm-icon name="chevron-right" [size]="16" /></button></div>
+            <div class="grid">
+              @for (p of h.bestSellers.products; track p.id; let i = $index) {
+                <ng-container *ngTemplateOutlet="productCard; context: { $implicit: p, i: i, lazy: i >= 4 }" />
+              }
+            </div>
+          </section>
+
+          @if (h.section; as sec) {
+            <section class="block panel" aria-labelledby="sec-h">
+              <div class="block__head"><h2 id="sec-h">{{ sec.title }}</h2>
+                @if (sec.type === 'collection' && sec.collectionId) { <button type="button" class="more" (click)="browse(sec.collectionId)">See all<tm-icon name="chevron-right" [size]="16" /></button> }
+                @else if (sec.type === 'new') { <button type="button" class="more" (click)="browse(null, 'new')">See all<tm-icon name="chevron-right" [size]="16" /></button> }
+              </div>
+              <div class="grid grid--section">
+                @for (p of sec.products; track p.id; let i = $index) {
+                  <ng-container *ngTemplateOutlet="productCard; context: { $implicit: p, i: i + 2, lazy: true }" />
+                }
+              </div>
+            </section>
+          }
+
+          @if (h.trust.freeShippingOverCents != null || h.trust.returnsDays || h.trust.location || h.trust.rating) {
+            <ul class="trust-strip">
+              @if (h.trust.freeShippingOverCents != null) { <li><span class="trust__icon"><tm-icon name="truck" [size]="18" /></span>{{ h.trust.freeShippingOverCents ? 'Free shipping over ' + (h.trust.freeShippingOverCents | money) : 'Free shipping' }}</li> }
+              @if (h.trust.returnsDays) { <li><span class="trust__icon"><tm-icon name="rotate-ccw" [size]="18" /></span>{{ h.trust.returnsDays }}-day returns</li> }
+              @if (h.trust.location) { <li><span class="trust__icon"><tm-icon name="map-pin" [size]="18" /></span>Based in {{ h.trust.location }}</li> }
+              @if (h.trust.rating && h.trust.reviewCount) { <li><span class="trust__icon"><tm-icon name="star" [size]="18" /></span>{{ h.trust.rating }} from {{ h.trust.reviewCount }} reviews</li> }
+            </ul>
+          }
         }
+
+        <footer class="foot">
+          <span class="foot__links">
+            <details class="foot__policy"><summary>Shipping &amp; returns</summary>
+              <p>{{ policy() }}</p>
+              @if (s.shipping.length) { <ul>@for (r of s.shipping; track r.id) { <li>{{ r.label }}{{ r.detail ? ', ' + r.detail : '' }}: {{ r.priceCents ? (r.priceCents | money) : 'Free' }}</li> }</ul> }
+              @if (s.freeShippingOverCents) { <p>Free standard shipping over {{ s.freeShippingOverCents | money }}.</p> }
+            </details>
+            @if (h.contactEmail) { <a [href]="'mailto:' + h.contactEmail">Contact</a> }
+          </span>
+          <span class="foot__network">Part of <a [href]="platformUrl"><strong>TODD Market</strong></a>, independent stores that send each other customers</span>
+        </footer>
       </main>
+      }
     } @else {
-      <!-- Results header -->
+      <!-- Results and browse header -->
       <header class="bar">
         <button type="button" class="brand" (click)="home()" aria-label="Store home">
           <span class="tm-store-mark mark-sm">@if (s.brand.logoUrl) { <img [src]="s.brand.logoUrl" alt=""> } @else { {{ initial() }} }</span>
@@ -36,9 +113,32 @@
           <tm-icon name="search" [size]="16" /><input name="q" [ngModel]="query()" (ngModelChange)="query.set($event)" aria-label="Search this store" autocomplete="off">
         </form>
         <button type="button" class="tm-btn tm-btn--primary find-sm" (click)="ask()">Find</button>
-        <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+        <span class="bar__actions">
+          <ng-container *ngTemplateOutlet="accountPill" />
+          <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button>
+        </span>
       </header>
 
+      @if (browseLoading()) {
+        <p class="thinking"><span class="tm-dot tm-dot--pulse"></span>Loading products…</p>
+      } @else if (browsing()) {
+        @if (browsing(); as b) {
+        <main class="browse">
+          <button type="button" class="back" (click)="home()"><tm-icon name="arrow-left" [size]="16" />{{ s.name }}</button>
+          <div class="block__head"><h2 class="heading">{{ b.title }}</h2>
+            <div class="layout-toggle" role="group" aria-label="Sort">
+              <button type="button" [class.on]="b.sort === 'best'" [attr.aria-pressed]="b.sort === 'best'" (click)="browse(b.category, 'best')">Best selling</button>
+              <button type="button" [class.on]="b.sort === 'new'" [attr.aria-pressed]="b.sort === 'new'" (click)="browse(b.category, 'new')">Newest</button>
+            </div>
+          </div>
+          <div class="grid">
+            @for (p of b.products; track p.id; let i = $index) {
+              <ng-container *ngTemplateOutlet="productCard; context: { $implicit: p, i: i, lazy: i >= 8 }" />
+            } @empty { <p class="note">Nothing here right now.</p> }
+          </div>
+        </main>
+        }
+      } @else {
       <main class="results">
         @if (searching()) {
           <p class="thinking"><span class="tm-dot tm-dot--pulse"></span>Putting it together…</p>
@@ -162,14 +262,27 @@
           }
         }
       </main>
+      }
     }
 
-    <nav class="tabbar" aria-label="Store">
-      <button type="button" [class.on]="!asked()" (click)="home()"><tm-icon name="store" [size]="20" />Shop</button>
-      <button type="button" [class.on]="asked()" (click)="asked() ? null : ask()"><tm-icon name="search" [size]="20" />Search</button>
-      <button type="button" (click)="bag.open.set(true)"><tm-icon name="shopping-bag" [size]="20" />Bag{{ bag.count() ? ' · ' + bag.count() : '' }}</button>
-      <a [routerLink]="auth.isSignedIn() ? '/account' : '/sign-in'" [queryParams]="auth.isSignedIn() ? null : { as: 'shopper', store: s.slug, next: '/account' }"><tm-icon name="user" [size]="20" />Account</a>
-    </nav>
+    <ng-template #accountPill>
+      @if (auth.isSignedIn()) {
+        <a class="bag-pill acct" routerLink="/account" aria-label="Your orders"><tm-icon name="user" [size]="16" /><span class="acct__label">Orders</span></a>
+      } @else {
+        <a class="bag-pill acct" routerLink="/sign-in" [queryParams]="signInParams()" aria-label="Sign in"><tm-icon name="user" [size]="16" /><span class="acct__label">Sign in</span></a>
+      }
+    </ng-template>
+
+    <ng-template #productCard let-p let-i="i" let-lazy="lazy">
+      <article class="prod">
+        <button type="button" class="prod__open" (click)="openProduct(p)" [attr.aria-label]="p.title + ', ' + (p.priceCents | money)">
+          <span class="prod__img" [class]="'tm-tint-' + tint(i)">@if (p.image) { <img [src]="p.image" alt="" [attr.loading]="lazy ? 'lazy' : null"> } @else { <tm-icon name="shopping-bag" [size]="40" /> }</span>
+          <strong class="prod__title">{{ p.title }}</strong>
+          <span class="prod__meta"><b>{{ p.priceCents | money }}</b>@if (p.rating && p.reviewCount >= 3) { <span class="prod__rating"><tm-icon name="star" [size]="13" />{{ p.rating }}</span> }@if (!p.available) { <span class="prod__rating">Sold out</span> }</span>
+        </button>
+        <button type="button" class="heart" [class.on]="isSaved(p)" (click)="toggleSave(p)" [attr.aria-pressed]="isSaved(p)" [attr.aria-label]="(isSaved(p) ? 'Unsave ' : 'Save ') + p.title"><tm-icon [name]="isSaved(p) ? 'heart-filled' : 'heart'" [size]="18" /></button>
+      </article>
+    </ng-template>
   </div>
   <tm-bag-drawer [homeStoreId]="s.id" [storeSlug]="s.slug" />
 } @else if (notFound()) {

@@ -53,6 +53,54 @@
               <button type="button" role="switch" class="switch" [class.on]="d.settings.store.pickup" [attr.aria-checked]="d.settings.store.pickup" (click)="togglePickup(!d.settings.store.pickup)"><span></span></button></div>
           </div>
         }
+        @case ('home') {
+          @if (home(); as hs) {
+            <div class="card">
+              <strong>Example searches</strong>
+              <span class="muted">Shown under your search box after "Try". Shoppers tap one to search. Leave them blank and we suggest them from your catalog, fresh each week.</span>
+              <div class="grid2">
+                @for (i of searchSlots; track i) {
+                  <input class="tm-input" maxlength="60" [attr.aria-label]="'Example search ' + (i + 1)" [placeholder]="homeOptions()?.automaticSearches?.[i] || 'A search shoppers might try'" [ngModel]="hs.exampleSearches[i] || ''" (ngModelChange)="setSearch(i, $event)">
+                }
+              </div>
+            </div>
+            <div class="card">
+              <strong>Extra section</strong>
+              <span class="muted">Shown below Best sellers. It hides itself when it has fewer than 4 products to show.</span>
+              <div class="grid2">
+                <label class="field"><span class="tm-label">Show</span>
+                  <select class="tm-input" [ngModel]="hs.section" (ngModelChange)="setHome({ section: $event, sectionCollectionId: $event === 'collection' ? (hs.sectionCollectionId || homeOptions()?.collections?.[0]?.id || null) : null })">
+                    <option value="new">New this week</option>
+                    <option value="gifts">Gifts (products tagged "gift")</option>
+                    <option value="collection">One of your collections</option>
+                    <option value="off">Nothing (off)</option>
+                  </select></label>
+                @if (hs.section === 'collection') {
+                  <label class="field"><span class="tm-label">Collection</span>
+                    <select class="tm-input" [ngModel]="hs.sectionCollectionId" (ngModelChange)="setHome({ sectionCollectionId: $event })">
+                      @for (c of homeOptions()?.collections || []; track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+                    </select></label>
+                }
+              </div>
+            </div>
+            <div class="card">
+              <strong>Category photos</strong>
+              <span class="muted">Each category shows the photo of its best-selling product. Pick one to always show instead.</span>
+              @for (c of homeOptions()?.collections || []; track c.id) {
+                <div class="cat-pick">
+                  <span class="cat-pick__name">{{ c.name }}</span>
+                  <div class="thumbs" role="group" [attr.aria-label]="c.name + ' photo'">
+                    <button type="button" class="thumb thumb--auto" [class.on]="!hs.categoryImages[c.id]" [attr.aria-pressed]="!hs.categoryImages[c.id]" (click)="pickImage(c.id, '')">Best seller</button>
+                    @for (p of c.products; track p.id) {
+                      <button type="button" class="thumb" [class.on]="hs.categoryImages[c.id] === p.id" [attr.aria-pressed]="hs.categoryImages[c.id] === p.id" (click)="pickImage(c.id, p.id)"><img [src]="p.image" [alt]="p.title" loading="lazy"></button>
+                    }
+                  </div>
+                </div>
+              } @empty { <span class="muted">Your categories show up here once your store is built.</span> }
+            </div>
+            <p class="muted note">The strip at the bottom of your home page uses your free shipping amount (Shipping), returns window (Returns) and location (Store). Anything you haven't set is left out.</p>
+          }
+        }
         @case ('returns') {
           <div class="card">
             <div class="block"><strong>Return window</strong>
