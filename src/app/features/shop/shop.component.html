@@ -8,7 +8,7 @@
     <a routerLink="/about">About</a>
   </nav>
   <button type="button" class="bag-pill" (click)="bag.open.set(true)" [attr.aria-label]="'Bag, ' + bag.count() + ' items'"><tm-icon name="shopping-bag" [size]="16" />{{ bag.count() }}</button> @if (auth.isSignedIn()) { <a class="tm-btn small hide-sm" routerLink="/account">Account</a> } @else { <a class="tm-btn small hide-sm" routerLink="/sign-in" [queryParams]="{ as: 'shopper' }">Sign in</a> } <a class="tm-btn tm-btn--primary small" routerLink="/sell">Open a store</a>
-  <app-platform-menu [isLoggedIn]="auth.isSignedIn()" [userName]="auth.user()?.displayName || ''" [userEmail]="auth.user()?.email || ''" />
+  <app-platform-menu [isLoggedIn]="auth.isSignedIn()" [userName]="auth.user()?.displayName || ''" [userEmail]="auth.user()?.email || ''" (signOut)="signOut()" />
 </header>
 <main class="page">
   <div class="toggle seg" role="tablist" aria-label="Shop">

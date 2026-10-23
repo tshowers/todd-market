@@ -113,6 +113,11 @@ export class ShopComponent implements OnInit {
     }
   }
 
+  /** The menu's Sign out: this page works signed out, so it stays here. */
+  async signOut (): Promise<void> {
+    await this.auth.signOut();
+  }
+
   add ( item: NetworkItem ): void {
     // Sample stores can't take payments; checkout would refuse the bag.
     if ( item.isSample ) return;

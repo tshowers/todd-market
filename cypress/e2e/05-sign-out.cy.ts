@@ -9,4 +9,14 @@ describe( 'Sign out', () => {
     cy.location( 'pathname' ).should( 'eq', '/sign-in' );
     cy.location( 'search' ).should( 'contain', 'as=merchant' );
   } );
+
+  it( 'signs out from the menu on the Shop stores home (/)', () => {
+    cy.visit( '/' );
+    cy.get( '.platform-menu-trigger' ).first().click();
+    cy.contains( 'button', 'Sign out' ).click();
+    cy.get( '.platform-menu-trigger' ).first().click();
+    cy.contains( 'button', 'Sign out' ).should( 'not.exist' );
+    cy.visit( '/account' );
+    cy.location( 'pathname' ).should( 'eq', '/sign-in' );
+  } );
 } );
