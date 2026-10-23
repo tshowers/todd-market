@@ -101,6 +101,46 @@
             <p class="muted note">The strip at the bottom of your home page uses your free shipping amount (Shipping), returns window (Returns) and location (Store). Anything you haven't set is left out.</p>
           }
         }
+        @case ('products') {
+          <div class="card">
+            <strong>Add products from a supplier spec sheet</strong>
+            <span class="muted">Lenovo partner spec sheets (.xlsx), one product per file. We use the photo, specs, part number and UPC, and price each one at the reseller price plus your markup. A part number you already sell gets its new price and stock instead of a second listing.</span>
+            <div class="sheet-controls">
+              <label class="field markup"><span class="tm-label">Markup on reseller price</span>
+                <span class="pct"><input class="tm-input" type="number" min="0" max="200" step="1" aria-label="Markup percent" [value]="markupPct()" (input)="setMarkup($any($event.target).value)"><span>%</span></span></label>
+              <label class="tm-btn tm-btn--ghost choose">Choose files<input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden #sheetInput (change)="chooseSheets(sheetInput)"></label>
+            </div>
+            @if (sheets().length) {
+              <ul class="sheets">
+                @for (r of sheets(); track r.fileName) {
+                  <li class="sheet">
+                    @if (r.product; as p) {
+                      <span class="sheet__main"><strong>{{ p.title }}</strong>
+                        <span class="muted">{{ p.productType || 'Product' }} · part {{ p.sku }} · {{ p.available ? 'In stock' : 'Out of stock' }}{{ p.hasPhoto ? '' : ' · no photo' }}{{ p.priceDate ? ' · price from ' + p.priceDate : '' }}</span></span>
+                      <span class="sheet__price"><span class="muted">Cost {{ p.costCents | money }}</span><strong>{{ (r.status === 'added' || r.status === 'updated' ? p.priceCents : sheetPrice(p)) | money }}</strong></span>
+                    } @else {
+                      <span class="sheet__main"><strong>{{ r.fileName }}</strong>@if (r.error) { <span class="tm-error">{{ r.error }}</span> }</span>
+                    }
+                    <span class="sheet__state">
+                      @switch (r.status) {
+                        @case ('reading') { <span class="muted">Reading…</span> }
+                        @case ('adding') { <span class="muted">Adding…</span> }
+                        @case ('added') { <span class="tm-tag tm-tint-green">Added</span> }
+                        @case ('updated') { <span class="tm-tag tm-tint-green">Price updated</span> }
+                        @case ('ready') { @if (r.product?.exists) { <span class="tm-tag tm-tint-yellow">Updates your listing</span> } <button type="button" class="remove" [attr.aria-label]="'Remove ' + r.fileName" (click)="removeSheet(r.fileName)">×</button> }
+                        @case ('error') { @if (r.product) { <span class="tm-error">{{ r.error }}</span> } <button type="button" class="remove" [attr.aria-label]="'Remove ' + r.fileName" (click)="removeSheet(r.fileName)">×</button> }
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+              @if (sheetsReady().length) {
+                <button type="button" class="tm-btn tm-btn--primary add-sheets" [disabled]="sheetsBusy()" (click)="addSheets()">Add {{ sheetsReady().length }} {{ sheetsReady().length === 1 ? 'product' : 'products' }} to your store</button>
+              }
+            }
+          </div>
+          <p class="muted note">Products from spec sheets go in a category named for their type (Laptops, Monitors…), which shows on your home page. Orders for them arrive like any other order; you order the item from your distributor.</p>
+        }
         @case ('returns') {
           <div class="card">
             <div class="block"><strong>Return window</strong>

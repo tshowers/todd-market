@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import { BuildJob, CustomDomain, HomeOptions, MerchantStore, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
+import { BuildJob, CustomDomain, HomeOptions, MerchantStore, SheetPreview, Palette, ReviewData, StoreBrand, StoreSettings, Voice } from '../models/merchant.model';
 
 export interface LedgerRow {
   id: string; direction: 'sent' | 'received'; store: string; item: string; date: number; saleCents: number; commissionCents: number;
@@ -156,6 +156,11 @@ export class MerchantService {
 
   disconnectDomain (): Promise<unknown> {
     return this.api.delete( '/merchant/settings/domain' );
+  }
+
+  /** Settings → Products: preview ({ add: false }) or add one supplier spec sheet (.xlsx). */
+  supplierSheet ( body: { fileName: string; dataUrl: string; markupPct: number; add: boolean } ): Promise<{ product: SheetPreview; added?: 'new' | 'updated'; productId?: string }> {
+    return this.api.post( '/merchant/products/supplier-sheet', body );
   }
 
   /** Settings → Home page: collections with photos to pick from, and the suggested example searches. */

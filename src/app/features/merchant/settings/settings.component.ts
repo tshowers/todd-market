@@ -2,20 +2,21 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { CustomDomain, HomeOptions, HomeSettings, MerchantStore, ShippingRate, StoreSettings } from '../../../models/merchant.model';
+import { CustomDomain, HomeOptions, HomeSettings, MerchantStore, SheetPreview, ShippingRate, StoreSettings } from '../../../models/merchant.model';
 import { apiErrorMessage } from '../../../services/market-api.service';
 import { MerchantService, TaxRegistration } from '../../../services/merchant.service';
 import { MoneyPipe } from '../../../shared/money.pipe';
 import { policySentence } from '../../../shared/return-policy';
 
-type Tab = 'store' | 'home' | 'returns' | 'tax' | 'shipping';
+type Tab = 'store' | 'home' | 'products' | 'returns' | 'tax' | 'shipping';
+interface SheetRow { fileName: string; dataUrl: string; status: 'reading' | 'ready' | 'error' | 'adding' | 'added' | 'updated'; error: string; product: SheetPreview | null }
 interface Draft { name: string; slug: string; directoryCategory: string; settings: StoreSettings }
 
 const US_STATES: [string, string][] = Object.entries( {
   AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
 } );
 
-/** Merchant settings (f14–f17, m20): Store · Home page · Returns · Tax · Shipping, saved together. */
+/** Merchant settings (f14–f17, m20): Store · Home page · Returns · Tax · Shipping, saved together; Products adds supplier spec sheets right away. */
 @Component( {
   selector: 'tm-settings',
   standalone: true,
@@ -30,11 +31,16 @@ export class SettingsComponent implements OnInit {
   private readonly router = inject( Router );
 
   readonly tabs: { key: Tab; label: string }[] = [
-    { key: 'store', label: 'Store' }, { key: 'home', label: 'Home page' }, { key: 'returns', label: 'Returns' }, { key: 'tax', label: 'Tax' }, { key: 'shipping', label: 'Shipping' },
+    { key: 'store', label: 'Store' }, { key: 'home', label: 'Home page' }, { key: 'products', label: 'Products' }, { key: 'returns', label: 'Returns' }, { key: 'tax', label: 'Tax' }, { key: 'shipping', label: 'Shipping' },
   ];
   readonly windows = [{ days: 14, label: '14 days' }, { days: 30, label: '30 days' }, { days: 60, label: '60 days' }, { days: 0, label: 'No returns' }];
   readonly states = US_STATES;
   readonly searchSlots = [0, 1, 2, 3];
+  /** Settings → Products: supplier spec sheets, read one file at a time. */
+  readonly sheets = signal<SheetRow[]>( [] );
+  readonly markupPct = signal( 15 );
+  readonly sheetsBusy = computed( () => this.sheets().some( ( r ) => r.status === 'reading' || r.status === 'adding' ) );
+  readonly sheetsReady = computed( () => this.sheets().filter( ( r ) => r.status === 'ready' ) );
   readonly homeOptions = signal<HomeOptions | null>( null );
   /** The home page settings, with the defaults the storefront uses until the owner changes them. */
   readonly home = computed<HomeSettings>( () => ( { exampleSearches: [], section: 'new', sectionCollectionId: null, categoryImages: {}, ...( this.draft()?.settings.home || {} ) } ) );
@@ -84,6 +90,55 @@ export class SettingsComponent implements OnInit {
   patch<K extends keyof StoreSettings> ( section: K, value: Partial<StoreSettings[K]> ): void {
     this.draft.update( ( d ) => d ? { ...d, settings: { ...d.settings, [section]: { ...d.settings[section], ...value } } } : d );
     this.savedNote.set( false );
+  }
+
+  /** The shopper's price at the current markup (the server uses the same rounding). */
+  sheetPrice ( p: SheetPreview ): number {
+    return Math.round( p.costCents * ( 1 + this.markupPct() / 100 ) );
+  }
+
+  /** Ignores an empty box (mid-edit), so clearing it to type a new number works. */
+  setMarkup ( value: string ): void {
+    if ( String( value ).trim() === '' ) return;
+    const n = Number( value );
+    if ( Number.isFinite( n ) && n >= 0 && n <= 200 ) this.markupPct.set( n );
+  }
+
+  async chooseSheets ( input: HTMLInputElement ): Promise<void> {
+    const files = [...( input.files || [] )].slice( 0, 50 );
+    input.value = '';
+    for ( const file of files ) {
+      const row: SheetRow = { fileName: file.name, dataUrl: '', status: 'reading', error: '', product: null };
+      this.sheets.update( ( list ) => [...list.filter( ( r ) => r.fileName !== file.name ), row] );
+      try {
+        if ( file.size > 6 * 1024 * 1024 ) throw new Error( 'That file is over 6 MB.' );
+        const dataUrl = await readAsDataUrl( file );
+        const { product } = await this.merchant.supplierSheet( { fileName: file.name, dataUrl, markupPct: this.markupPct(), add: false } );
+        this.updateSheet( file.name, { dataUrl, product, status: 'ready' } );
+      } catch ( error ) {
+        this.updateSheet( file.name, { status: 'error', error: apiErrorMessage( error, ( error as Error )?.message || "We couldn't read that file." ) } );
+      }
+    }
+  }
+
+  async addSheets (): Promise<void> {
+    for ( const row of this.sheetsReady() ) {
+      this.updateSheet( row.fileName, { status: 'adding' } );
+      try {
+        const { product, added } = await this.merchant.supplierSheet( { fileName: row.fileName, dataUrl: row.dataUrl, markupPct: this.markupPct(), add: true } );
+        this.updateSheet( row.fileName, { product, status: added === 'updated' ? 'updated' : 'added', dataUrl: '' } );
+      } catch ( error ) {
+        this.updateSheet( row.fileName, { status: 'error', error: apiErrorMessage( error, "We couldn't add that product." ) } );
+      }
+    }
+  }
+
+  removeSheet ( fileName: string ): void {
+    this.sheets.update( ( list ) => list.filter( ( r ) => r.fileName !== fileName ) );
+  }
+
+  private updateSheet ( fileName: string, change: Partial<SheetRow> ): void {
+    this.sheets.update( ( list ) => list.map( ( r ) => r.fileName === fileName ? { ...r, ...change } : r ) );
   }
 
   setHome ( value: Partial<HomeSettings> ): void {
@@ -249,4 +304,13 @@ export class SettingsComponent implements OnInit {
     this.saved.set( JSON.stringify( draft ) );
     this.draft.set( draft );
   }
+}
+
+function readAsDataUrl ( file: File ): Promise<string> {
+  return new Promise( ( resolve, reject ) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve( String( reader.result ) );
+    reader.onerror = () => reject( new Error( "We couldn't open that file." ) );
+    reader.readAsDataURL( file );
+  } );
 }

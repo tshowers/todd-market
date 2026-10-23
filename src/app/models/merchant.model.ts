@@ -68,6 +68,14 @@ export interface HomeSettings {
   categoryImages: Record<string, string>;
 }
 
+/** A supplier spec sheet read by the server (Settings → Products). */
+export interface SheetPreview {
+  sourceId: string; title: string; sku: string; productType: string; costCents: number; priceCents: number;
+  available: boolean; priceDate: string; hasPhoto: boolean;
+  /** The store already has this part number: adding updates its price and stock. */
+  exists: boolean;
+}
+
 export interface HomeOptions {
   collections: { id: string; name: string; products: { id: string; title: string; image: string }[] }[];
   automaticSearches: string[];
