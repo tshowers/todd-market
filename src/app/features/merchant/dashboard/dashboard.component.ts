@@ -90,6 +90,10 @@ export class DashboardComponent implements OnInit {
     await this.save( { networkSearch: on } );
   }
 
+  async setWebListings ( on: boolean ): Promise<void> {
+    await this.save( { webListings: on } );
+  }
+
   async acceptFrom ( value: 'any' | 'approved' ): Promise<void> {
     await this.save( { acceptFrom: value } );
   }

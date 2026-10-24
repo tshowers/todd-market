@@ -75,12 +75,17 @@ export interface Look {
   referral?: { what: string; store: NetworkStore; item: PublicProduct; totalWithCents: number };
 }
 
+/** A product from a shop in the Find crawl that isn't on TODD Market: links out, nothing to buy here. */
+export interface ListingItem { id: string; title: string; image: string; url: string; storeName: string; storeDomain: string; storeUrl: string; category: string; priceCents?: number | null }
+
 export interface SearchResult {
   query: string;
   heading: string;
   note: string;
   looks: Look[];
   referral: { kind: 'whole'; store: NetworkStore; heading: string; items: PublicProduct[] } | null;
+  /** No store in the network has it: shops from the Find crawl, linking out. Never alongside a referral. */
+  listingItems?: ListingItem[];
   productCount: number;
   ms: number;
 }

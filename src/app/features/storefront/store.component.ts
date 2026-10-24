@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
-import { BrowseResult, Look, ProductCard, PublicProduct, PublicStore, SearchResult, StoreHome } from '../../models/storefront.model';
+import { BrowseResult, ListingItem, Look, ProductCard, PublicProduct, PublicStore, SearchResult, StoreHome } from '../../models/storefront.model';
 import { BagService } from '../../services/bag.service';
 import { apiErrorMessage } from '../../services/market-api.service';
 import { MarketAuthService } from '../../services/market-auth.service';
@@ -17,6 +17,7 @@ import { shortStoreName, storePossessive } from '../../shared/short-store-name';
 import { MoneyPipe } from '../../shared/money.pipe';
 import { policySentence } from '../../shared/return-policy';
 import { storeAddress } from '../../shared/store-address';
+import { InterestDialogComponent } from '../shop/interest-dialog.component';
 import { BagDrawerComponent } from './bag-drawer.component';
 
 const TILE_TINTS = ['pink', 'blue', 'cyan', 'violet', 'yellow', 'green'];
@@ -24,7 +25,8 @@ const RATINGS = [{ key: 'excellent', label: 'Excellent' }, { key: 'good', label:
 
 /**
  * A store's Find-style storefront (§2, §3): home, intent search, looks,
- * referral variant C (shared bag), and the bag. The home page below the
+ * referral variant C (shared bag), shops from the Find crawl when no network
+ * store has it, and the bag. The home page below the
  * search (categories, best sellers, the owner's section, trust strip) is
  * design_handoff_todd_market_storefront; "All products" and "See all" open
  * the browse view.
@@ -32,7 +34,7 @@ const RATINGS = [{ key: 'excellent', label: 'Excellent' }, { key: 'good', label:
 @Component( {
   selector: 'tm-store',
   standalone: true,
-  imports: [FormsModule, NgTemplateOutlet, RouterLink, IconComponent, MoneyPipe, BagDrawerComponent],
+  imports: [FormsModule, NgTemplateOutlet, RouterLink, IconComponent, MoneyPipe, BagDrawerComponent, InterestDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'tt-page', '(window:scroll)': 'onScroll()' },
   templateUrl: './store.component.html',
@@ -64,6 +66,8 @@ export class StoreComponent implements OnInit {
   readonly error = signal( '' );
   readonly rating = signal( '' );
   readonly adding = signal( '' );
+  /** "Want to buy it here?" on a crawled shop's item. */
+  readonly interestFor = signal<ListingItem | null>( null );
   /** The shopper's pick of results layout; null follows the result (d09 / d10). */
   readonly layoutChoice = signal<'compare' | 'grid' | null>( null );
   readonly layout = computed<'compare' | 'grid'>( () => {

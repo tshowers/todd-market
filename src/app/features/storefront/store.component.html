@@ -248,6 +248,22 @@
                 </article>
               }
             </div>
+            } @else if (r.listingItems?.length) {
+            <!-- Nobody in the network has it: shops from the Find crawl, on their own sites -->
+            <div class="source"><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
+            <h2 class="heading">Not at {{ shortName() }}, but these shops may have it.</h2>
+            <p class="note">No store on TODD Market carries it yet. These shops sell it on their own websites, at their own prices.</p>
+            <div class="litems">
+              @for (l of r.listingItems; track l.id) {
+                <div class="litem">
+                  <a class="lthumb" [href]="l.url" target="_blank" rel="noopener nofollow">@if (l.image) { <img [src]="l.image" alt="" loading="lazy"> }</a>
+                  <span class="lstore">{{ l.storeName }}</span>
+                  <strong>{{ l.title }}</strong>@if (l.priceCents) { <span class="lprice">{{ l.priceCents | money }}</span> }
+                  <a class="lgo" [href]="l.url" target="_blank" rel="noopener nofollow">Shop on their site ↗</a>
+                  <button type="button" class="want" (click)="interestFor.set(l)">Want to buy it here?</button>
+                </div>
+              }
+            </div>
             } @else {
             <h2 class="heading">Nothing here fits that yet.</h2>
             <p class="note">Try describing it another way, or with fewer details. No store in the network carries it right now either.</p>
@@ -284,6 +300,7 @@
       </article>
     </ng-template>
   </div>
+  @if (interestFor(); as l) { <tm-interest-dialog [domain]="l.storeDomain" [shopName]="l.storeName" [shopUrl]="l.storeUrl" [productUrl]="l.url" [productTitle]="l.title" (closed)="interestFor.set(null)" /> }
   <tm-bag-drawer [homeStoreId]="s.id" [storeSlug]="s.slug" />
 } @else if (notFound()) {
   <main class="missing"><h1>That store isn't here.</h1><p>It may have closed, or the link is old.</p><a class="tm-btn tm-btn--primary" routerLink="/">Back to TODD Market</a></main>

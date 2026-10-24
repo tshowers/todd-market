@@ -1,7 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 
-import { PublicProduct } from '../models/storefront.model';
+import { ListingItem, PublicProduct } from '../models/storefront.model';
 import { MarketApiService } from './market-api.service';
 
 export interface DirectoryStore {
@@ -17,7 +17,7 @@ export interface Listing {
   domain: string; name: string; url: string; category: string; region: string; city: string;
   products: { title: string; url: string; imageUrl: string; description: string; priceCents?: number | null }[];
 }
-export interface ListingItem { id: string; title: string; image: string; url: string; storeName: string; storeDomain: string; storeUrl: string; category: string; priceCents?: number | null }
+export type { ListingItem };
 export interface NetworkResult {
   query: string; bestId: string | null; note: string; items: NetworkItem[]; listingItems?: ListingItem[];
   stores: ( DirectoryStore & { matches: number } )[]; storesSearched: number; ms: number;

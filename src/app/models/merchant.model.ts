@@ -34,6 +34,8 @@ export interface MerchantStore {
     acceptFrom: 'any' | 'approved';
     approvedStoreIds: string[];
     networkSearch?: boolean;
+    /** In-store search, when no network store has it: shops from the Find crawl. On unless false. */
+    webListings?: boolean;
   };
   directoryCategory: string;
   customDomain: CustomDomain | null;
