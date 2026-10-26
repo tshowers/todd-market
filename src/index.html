@@ -25,6 +25,20 @@
   <link rel="apple-touch-icon" href="/assets/market-touch-icon.png">
   <!-- taliferro-ui/platform/theme.ts THEME_BOOT_SCRIPT: apply a stored Light/Dark choice before first paint. -->
   <script>try{var t=localStorage.getItem('tt-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    // No GA on localhost: local dev and the Cypress runs in deploy.sh otherwise
+    // show up in GA as thousands of one-second "users".
+    if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      var gaTag = document.createElement('script');
+      gaTag.async = true;
+      gaTag.src = 'https://www.googletagmanager.com/gtag/js?id=G-8217EWV7X6';
+      document.head.appendChild(gaTag);
+      gtag('js', new Date());
+      gtag('config', 'G-8217EWV7X6');
+    }
+  </script>
 </head>
 <body>
   <tm-root></tm-root>
