@@ -26,7 +26,7 @@ interface UploadItem { key: string; name: string; kind: 'photo' | 'pdf'; status:
       @if (claimed(); as c) {
         <div class="claimed tm-tint-green">Welcome, {{ storeName() }}.@if (c.interestCount) { {{ c.interestCount }} shopper{{ c.interestCount === 1 ? '' : 's' }} already asked to buy from you here, and we'll tell the ones who asked to know when you go live. }</div>
       }
-      <div><h1 class="tm-h1">Bring your catalog.</h1><p class="tm-lead">TODD Market reads it and builds your store. Nothing goes live until you approve it.</p></div>
+      <div><h1 class="tm-h1">Bring your catalog.</h1><p class="tm-lead">16Ahead Store reads it and builds your store. Nothing goes live until you approve it.</p></div>
       <div class="sources" role="radiogroup" aria-label="Where your catalog is">
         @for (s of sources; track s.key) {
           <button type="button" role="radio" class="source" [class.on]="source() === s.key" [attr.aria-checked]="source() === s.key" (click)="pick(s.key)">
@@ -65,7 +65,7 @@ interface UploadItem { key: string; name: string; kind: 'photo' | 'pdf'; status:
           <label class="field"><span class="tm-label">Printful private token</span>
             <input class="tm-input" type="password" autocomplete="off" [ngModel]="printfulToken()" (ngModelChange)="printfulToken.set($event); found.set(null)" (blur)="previewPrintful()"></label>
           <label class="field"><span class="tm-label">Store name</span>
-            <input class="tm-input" placeholder="TODD Tees" [ngModel]="storeName()" (ngModelChange)="storeName.set($event)"></label>
+            <input class="tm-input" placeholder="16Ahead Tees" [ngModel]="storeName()" (ngModelChange)="storeName.set($event)"></label>
         }
         @case ('files') {
           <label class="drop">

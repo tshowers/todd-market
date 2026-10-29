@@ -21,7 +21,7 @@ import { MoneyPipe } from '../../shared/money.pipe';
         <span class="tm-tag" [class.tm-tint-blue]="o.status === 'in_progress'" [class.tm-tint-green]="o.status === 'delivered'" [class.tm-tint-violet]="o.status === 'refunded'">{{ label(o.status) }}</span>
       </a>
     } @empty {
-      @if (loaded()) { <p class="muted">No orders yet. Orders you place at any TODD Market store show up here.</p> }
+      @if (loaded()) { <p class="muted">No orders yet. Orders you place at any 16Ahead Store store show up here.</p> }
     }
     @if (error()) { <p class="tm-error">{{ error() }}</p> }`,
   styles: [`

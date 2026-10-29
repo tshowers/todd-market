@@ -18,7 +18,7 @@ import { PublicHeaderComponent } from '../../shared/public-header/public-header.
     <main class="page">
       <section class="hero">
         <div class="hero__copy">
-          <span class="tm-tag tm-tint-blue">TODD Market for iPhone</span>
+          <span class="tm-tag tm-tint-blue">16Ahead Store for iPhone</span>
           <h1>Run your store from your pocket.</h1>
           <p class="lead">Get new orders and referrals as they happen, approve changes the AI suggests, and check your payouts. Shoppers can use it to shop every store in the network with one account.</p>
           <div class="get">
@@ -32,7 +32,7 @@ import { PublicHeaderComponent } from '../../shared/public-header/public-header.
               </span>
             }
           </div>
-          <span class="req">Requires iOS 17 or later. Free for TODD Market stores and shoppers.</span>
+          <span class="req">Requires iOS 17 or later. Free for 16Ahead Store stores and shoppers.</span>
         </div>
         <div class="phone-wrap" aria-hidden="true">
           <div class="phone">
@@ -99,7 +99,7 @@ import { PublicHeaderComponent } from '../../shared/public-header/public-header.
 export class IosComponent {
   readonly appStoreUrl = IOS_APP_STORE_URL;
   readonly feed = [
-    { t: 'New order · $328.35', s: 'Maya O. · 4 items, 2 stores', kind: 'blue' },
+    { t: 'New order · $328.35', s: 'Marketing Assistant O. · 4 items, 2 stores', kind: 'blue' },
     { t: 'Referral earned · $18.50', s: "Cameron's sold a Halden oxford", kind: 'cyan' },
     { t: 'Approve 3 new descriptions', s: 'Fall guest dresses', kind: '' },
     { t: 'Payout on the way · $1,204.60', s: 'Arrives Friday', kind: '' },
@@ -113,7 +113,7 @@ export class IosComponent {
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'TODD Market for iPhone: Run your store from your pocket',
+      title: '16Ahead Store for iPhone: Run your store from your pocket',
       description: 'Get new orders and referrals as they happen, approve changes the AI suggests, and check your payouts.',
       path: '/ios',
     } );

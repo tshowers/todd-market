@@ -40,8 +40,8 @@ export class LandingComponent {
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'TODD Market: Independent stores that send each other customers',
-      description: "Bring your catalog and TODD Market builds your store. Shoppers say what they need in plain words. When you don't carry it, we send them to a store that does, and you earn part of that sale.",
+      title: '16Ahead Store: Independent stores that send each other customers',
+      description: "Bring your catalog and 16Ahead Store builds your store. Shoppers say what they need in plain words. When you don't carry it, we send them to a store that does, and you earn part of that sale.",
       path: '/sell',
     } );
   }

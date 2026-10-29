@@ -9,11 +9,11 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer class="foot">
-      <a routerLink="/">← Back to TODD Market</a>
+      <a routerLink="/">← Back to 16Ahead Store</a>
       @if (aboutLink()) {
-        <a routerLink="/about">About TODD Market →</a>
+        <a routerLink="/about">About 16Ahead Store →</a>
       } @else {
-        <span class="muted">TODD Market · Taliferro Tech, LLC</span>
+        <span class="muted">16Ahead Store · Taliferro Tech, LLC</span>
       }
     </footer>`,
   styles: [`

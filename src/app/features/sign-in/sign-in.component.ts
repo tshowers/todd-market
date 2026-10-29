@@ -50,14 +50,14 @@ export class SignInComponent implements OnInit {
 
   readonly title = computed( () => this.mode() === 'shopper'
     ? `Sign in to shop ${ this.store()?.name || 'the network' }`
-    : 'Sign in to TODD Market' );
+    : 'Sign in to 16Ahead Store' );
   readonly subtitle = computed( () => this.mode() === 'shopper'
-    ? 'Your TODD account works at every store in the network, with your orders, addresses and returns in one place.'
+    ? 'Your 16Ahead account works at every store in the network, with your orders, addresses and returns in one place.'
     : 'Manage your store, referrals and payouts.' );
   readonly codeComplete = computed( () => this.code().every( ( digit ) => /^\d$/.test( digit ) ) );
 
   constructor () {
-    inject( SeoService ).set( { title: 'Sign in | TODD Market', description: 'Sign in to TODD Market.', path: '/sign-in', noindex: true } );
+    inject( SeoService ).set( { title: 'Sign in | 16Ahead Store', description: 'Sign in to 16Ahead Store.', path: '/sign-in', noindex: true } );
   }
 
   async ngOnInit (): Promise<void> {

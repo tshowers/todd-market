@@ -108,3 +108,15 @@ html.dark .tm-branded, :root[data-theme="dark"] .tm-branded { --brand-tint: var(
 .tm-lead { font-size: 17px; color: var(--muted); max-width: 560px; text-wrap: pretty; }
 .tm-h4 { font-size: 15px; font-weight: 700; }
 @media (max-width: 600px) { .tm-h1 { font-size: 32px; } }
+
+/* The product mark (design_handoff_16ahead_logos) comes as a light/dark
+ * pair: each spot renders both and the theme hides one. The light set's
+ * black ticks vanish on dark, and inverting it turns the blue tick orange. */
+@media not (prefers-color-scheme: dark) {
+  :root:not(.dark):not([data-theme="dark"]) .brand-mark--dark { display: none !important; }
+}
+:root.light .brand-mark--dark, :root[data-theme="light"] .brand-mark--dark { display: none !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not([data-theme="light"]) .brand-mark--light { display: none !important; }
+}
+:root.dark .brand-mark--light, :root[data-theme="dark"] .brand-mark--light { display: none !important; }

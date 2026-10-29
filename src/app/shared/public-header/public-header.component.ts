@@ -20,11 +20,11 @@ export type PublicNavKey = 'how' | 'shop' | 'pricing' | 'ios' | 'help' | 'about'
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="bar">
-      <a class="brand" routerLink="/sell" aria-label="TODD Market for stores">
+      <a class="brand" routerLink="/sell" aria-label="16Ahead Store for stores">
         <span class="mark"><tm-ring-icon [size]="34" /></span>
-        <span class="word">TODD <span>Market</span></span>
+        <span class="word">16Ahead <span>Store</span></span>
       </a>
-      <nav class="pills" aria-label="TODD Market">
+      <nav class="pills" aria-label="16Ahead Store">
         <a routerLink="/sell" fragment="how-it-works" [class.on]="active() === 'how'">How it works</a>
         <a routerLink="/" [class.on]="active() === 'shop'">Shop stores</a>
         <a routerLink="/pricing" [class.on]="active() === 'pricing'">Pricing</a>

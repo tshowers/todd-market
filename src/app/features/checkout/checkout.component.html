@@ -13,7 +13,7 @@
     <div class="grid">
       <div class="col">
         <section class="card">
-          <div class="card__head"><h2>1 · Contact</h2>@if (signedInEmail()) { <span>Signed in with TODD</span> }</div>
+          <div class="card__head"><h2>1 · Contact</h2>@if (signedInEmail()) { <span>Signed in with 16Ahead</span> }</div>
           <label class="field"><span class="tm-label">Email</span>
             <input class="tm-input" [class.tm-input--error]="emailError()" type="email" autocomplete="email" [ngModel]="email()" (ngModelChange)="setEmail($event)"></label>
           @if (emailError()) { <span class="tm-error">Enter a valid email address.</span> }

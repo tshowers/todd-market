@@ -23,7 +23,7 @@ const VIDEO = ( mode: ThemeMode ) => `/assets/video/todd-market-how-it-works-${ 
     <div class="frame">
       <video #video [attr.src]="src() + '.mp4'" [attr.poster]="src() + '.jpg'" playsinline muted preload="metadata"
         [attr.controls]="started() ? '' : null" (ended)="started.set(false)"
-        aria-label="How TODD Market works: a store goes from catalog to first referral. 90 seconds, captions on screen, no sound."></video>
+        aria-label="How 16Ahead Store works: a store goes from catalog to first referral. 90 seconds, captions on screen, no sound."></video>
       @if (!started()) {
         <button type="button" class="cover" (click)="play()">
           <span class="play"><tm-icon name="play" [size]="34" /></span>

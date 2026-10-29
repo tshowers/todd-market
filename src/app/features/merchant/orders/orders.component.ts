@@ -58,7 +58,7 @@ import { MoneyPipe } from '../../../shared/money.pipe';
           </div>
           <ul>@for (i of o.items; track $index) { <li>{{ i.title }}{{ i.variantTitle ? ' · ' + i.variantTitle : '' }} × {{ i.quantity }}@if (i.referred) { <span class="tm-tag tm-tint-cyan">referred</span> }</li> }</ul>
           <p class="muted">Ship {{ o.shippingRate?.label || '' }} to {{ o.address.line1 }}, {{ o.address.city }}, {{ o.address.state }} {{ o.address.postal_code }}{{ o.address.phone ? ' · ' + o.address.phone : '' }}</p>
-          <p class="muted">TODD Market fee {{ o.platformFeeCents | money: true }}{{ o.commissionCents ? ' · referral commission ' + (o.commissionCents | money: true) : '' }}{{ o.refundedCents ? ' · refunded ' + (o.refundedCents | money: true) : '' }}</p>
+          <p class="muted">16Ahead Store fee {{ o.platformFeeCents | money: true }}{{ o.commissionCents ? ' · referral commission ' + (o.commissionCents | money: true) : '' }}{{ o.refundedCents ? ' · refunded ' + (o.refundedCents | money: true) : '' }}</p>
           <div class="ful">
             <div class="seg">
               @for (s of statuses; track s.key) { <button type="button" [class.on]="o.fulfillment.status === s.key" [disabled]="busy() === o.id" (click)="set(o, s.key)">{{ s.label }}</button> }

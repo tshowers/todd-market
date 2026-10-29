@@ -24,7 +24,7 @@ export interface NetworkResult {
 }
 
 /** Hosts that are TODD Market itself; any other host is a store's own domain. */
-const MARKET_HOSTS = /^(market\.taliferro\.tech|todd-market\.web\.app|todd-market\.firebaseapp\.com|localhost|127\.0\.0\.1)$/;
+const MARKET_HOSTS = /^(market\.taliferro\.tech|(www\.)?16ahead\.store|todd-market\.web\.app|todd-market\.firebaseapp\.com|localhost|127\.0\.0\.1)$/;
 
 /** Shop stores, Search all stores, and stores on their own domains. */
 @Injectable( { providedIn: 'root' } )

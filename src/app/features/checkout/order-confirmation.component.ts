@@ -83,7 +83,7 @@ export class OrderConfirmationComponent implements OnInit {
   readonly firstName = computed( () => ( this.order()?.address?.name || '' ).split( ' ' )[0] );
 
   constructor () {
-    inject( SeoService ).set( { title: 'Your order | TODD Market', description: 'Your order', path: '/order', noindex: true } );
+    inject( SeoService ).set( { title: 'Your order | 16Ahead Store', description: 'Your order', path: '/order', noindex: true } );
   }
 
   async ngOnInit (): Promise<void> {

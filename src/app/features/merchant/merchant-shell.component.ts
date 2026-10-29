@@ -21,7 +21,7 @@ import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.
   template: `
     <div class="page">
       <header class="head">
-        <a class="title" routerLink="/app">TODD Market <span>for merchants</span></a>
+        <a class="title" routerLink="/app">16Ahead Store <span>for merchants</span></a>
         @if (onboardingStep(); as current) {
           <ol class="steps" aria-label="Setup steps">
             @for (s of steps; track s.key; let i = $index) {

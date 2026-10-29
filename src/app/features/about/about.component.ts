@@ -18,9 +18,9 @@ import { RingIconComponent } from '../../shared/ring-icon/ring-icon.component';
     <main class="page">
       <section class="hero">
         <div class="hero__copy">
-          <div class="kicker"><span class="tm-tag tm-tint-blue">About TODD Market</span><span>A Taliferro Tech product · Part of TODD</span></div>
+          <div class="kicker"><span class="tm-tag tm-tint-blue">About 16Ahead Store</span><span>A Taliferro Tech product · Part of 16Ahead</span></div>
           <h1>Commerce for independent stores, connected to each other.</h1>
-          <p class="lead">TODD Market turns a store's catalog into a working storefront, helps shoppers find what they asked for, and links independent stores into a referral network so no shopper leaves empty-handed.</p>
+          <p class="lead">16Ahead Store turns a store's catalog into a working storefront, helps shoppers find what they asked for, and links independent stores into a referral network so no shopper leaves empty-handed.</p>
         </div>
         <div class="icon"><tm-ring-icon class="icon--big" [size]="96" /><tm-ring-icon class="icon--small" [size]="52" /></div>
       </section>
@@ -41,14 +41,14 @@ import { RingIconComponent } from '../../shared/ring-icon/ring-icon.component';
           <h2>A shopper should never hit a dead end.</h2>
         </div>
         <div class="idea__body">
-          <p>Most online stores make shoppers do the work: browse categories, set filters, compare tabs. TODD Market lets them describe what they need, then narrows, bundles and explains the trade-offs.</p>
-          <p>When a store doesn't carry something, the usual result is a lost shopper. In TODD Market, the store hands that shopper to a trusted store nearby, in its own voice, and earns part of the sale.</p>
+          <p>Most online stores make shoppers do the work: browse categories, set filters, compare tabs. 16Ahead Store lets them describe what they need, then narrows, bundles and explains the trade-offs.</p>
+          <p>When a store doesn't carry something, the usual result is a lost shopper. In 16Ahead Store, the store hands that shopper to a trusted store nearby, in its own voice, and earns part of the sale.</p>
         </div>
       </section>
 
       <div class="actions">
         <a class="tm-btn tm-btn--primary tm-btn--lg" routerLink="/app/onboarding">Start selling →</a>
-        <a class="tm-btn tm-btn--lg" routerLink="/help">Read TODD Market Help →</a>
+        <a class="tm-btn tm-btn--lg" routerLink="/help">Read 16Ahead Store Help →</a>
       </div>
     </main>
     <tm-public-footer />`,
@@ -88,14 +88,14 @@ export class AboutComponent {
   readonly cards = [
     { tag: 'What it is', tint: 'blue', title: 'A storefront and a referral network', body: 'An AI-built store for independent merchants, connected to other stores that refer shoppers to each other.' },
     { tag: "Who it's for", tint: 'violet', title: 'Independent stores', body: 'Boutiques, specialty shops and local makers who want an online store without a long setup.' },
-    { tag: 'Who made it', tint: 'pink', title: 'Taliferro Tech', body: 'TODD Market is part of TODD, the Taliferro Tech family that also includes Find.' },
+    { tag: 'Who made it', tint: 'pink', title: 'Taliferro Tech', body: '16Ahead Store is part of 16Ahead, the Taliferro Tech family that also includes Find.' },
     { tag: 'Where it lives', tint: 'cyan', title: 'On the web and inside Find', body: 'Each store gets its own address, and every listing can be read by AI shopping agents.' },
   ];
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'About TODD Market | Taliferro Tech',
-      description: "TODD Market turns a store's catalog into a working storefront, helps shoppers find what they asked for, and links independent stores into a referral network.",
+      title: 'About 16Ahead Store | 16Ahead',
+      description: "16Ahead Store turns a store's catalog into a working storefront, helps shoppers find what they asked for, and links independent stores into a referral network.",
       path: '/about',
     } );
   }

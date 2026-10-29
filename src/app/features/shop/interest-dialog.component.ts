@@ -20,7 +20,7 @@ import { ShopService } from '../../services/shop.service';
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="interest-title">
       @if (!done()) {
         <h2 id="interest-title">Want to buy from {{ shopName() }} here?</h2>
-        <p>{{ shopName() }} isn't on TODD Market yet. We'll let them know shoppers want to buy {{ productTitle() ? '"' + productTitle() + '"' : 'from them' }} here, with one checkout and one bag.</p>
+        <p>{{ shopName() }} isn't on 16Ahead Store yet. We'll let them know shoppers want to buy {{ productTitle() ? '"' + productTitle() + '"' : 'from them' }} here, with one checkout and one bag.</p>
         <label class="check"><input type="checkbox" [ngModel]="notify()" (ngModelChange)="notify.set($event)"> Email me when {{ shopName() }} joins</label>
         @if (notify()) { <input class="tm-input" type="email" placeholder="you@example.com" [ngModel]="email()" (ngModelChange)="email.set($event)" autocomplete="email"> }
         @if (error()) { <p class="tm-error">{{ error() }}</p> }
@@ -31,7 +31,7 @@ import { ShopService } from '../../services/shop.service';
         <p class="fine">We only use your email to tell you when this shop joins, once.</p>
       } @else {
         <h2 id="interest-title">Thanks, we'll let them know.</h2>
-        <p>{{ notify() ? "We'll email you once if " + shopName() + ' joins TODD Market.' : 'You can still shop on their website in the meantime.' }}</p>
+        <p>{{ notify() ? "We'll email you once if " + shopName() + ' joins 16Ahead Market.' : 'You can still shop on their website in the meantime.' }}</p>
         <div class="actions"><button type="button" class="tm-btn" (click)="closed.emit()">Done</button></div>
       }
     </div>`,

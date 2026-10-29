@@ -13,7 +13,7 @@ import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.
   host: { class: 'tt-page' },
   template: `
     <div class="page">
-      <header class="head"><a routerLink="/" class="title">TODD <span>Market</span></a>
+      <header class="head"><a routerLink="/" class="title">16Ahead <span>Store</span></a>
         <app-platform-menu [isLoggedIn]="true" [userName]="auth.user()?.displayName || ''" [userEmail]="auth.user()?.email || ''" (signOut)="signOut()" /></header>
       <div class="layout">
         <aside class="side">
@@ -25,7 +25,7 @@ import { PlatformMenuComponent } from '../../shared/platform-menu/platform-menu.
             <a routerLink="/account/payment-methods" routerLinkActive="on">Payment methods</a>
             <a routerLink="/account/security" routerLinkActive="on">Sign-in &amp; security</a>
           </nav>
-          <p class="note">One TODD account works at every store in the network.</p>
+          <p class="note">One 16Ahead account works at every store in the network.</p>
         </aside>
         <main class="main"><router-outlet /></main>
       </div>

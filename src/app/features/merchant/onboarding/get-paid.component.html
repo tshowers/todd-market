@@ -55,7 +55,7 @@
           }
         </div>
 
-        <p class="honest">Why this can't be skipped: the law requires anyone who takes card payments to verify their identity and business. Stripe runs the checks. TODD Market never stores your ID.</p>
+        <p class="honest">Why this can't be skipped: the law requires anyone who takes card payments to verify their identity and business. Stripe runs the checks. 16Ahead Store never stores your ID.</p>
         @if (error()) { <span class="tm-error" role="alert">{{ error() }}</span> }
         <div class="actions">
           <button type="button" class="tm-btn tm-btn--primary go" [disabled]="!accepting() || busy()" (click)="goLive()">{{ busy() ? 'Opening your store…' : 'Go live' }}</button>

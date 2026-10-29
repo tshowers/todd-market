@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'tm-ring-icon',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<img src="assets/market-logo.png" alt="" [attr.width]="size()" [attr.height]="size()" />`,
+  template: `<img class="brand-mark--light" src="assets/brand/products/svg/light/16-store.svg" alt="" [attr.width]="size()" [attr.height]="size()" /><img class="brand-mark--dark" src="assets/brand/products/svg/dark/16-store.svg" alt="" [attr.width]="size()" [attr.height]="size()" />`,
   styles: [':host { display: inline-grid; place-items: center; line-height: 0; } img { object-fit: contain; }'],
 } )
 export class RingIconComponent {

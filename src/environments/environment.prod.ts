@@ -17,6 +17,6 @@ export const environment = {
     storageBucket: 'taliferrotech.appspot.com',
     messagingSenderId: '633736143723',
     appId: '1:633736143723:web:1f91a0cc7efcdc9b5fe22e',
-    measurementId: 'G-YQ9PHPM6FJ',
+    measurementId: 'G-4QZ1CSSGYJ',
   },
 };

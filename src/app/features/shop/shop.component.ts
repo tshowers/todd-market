@@ -75,8 +75,8 @@ export class ShopComponent implements OnInit {
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'TODD Market: Shop independent stores',
-      description: 'One search across every independent store in the TODD Market network, or browse the stores one at a time.',
+      title: '16Ahead Store: Shop independent stores',
+      description: 'One search across every independent store in the 16Ahead Store network, or browse the stores one at a time.',
       path: '/',
     } );
   }

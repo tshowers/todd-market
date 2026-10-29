@@ -43,7 +43,7 @@ export class ClaimComponent implements OnInit {
   readonly error = signal( '' );
 
   constructor () {
-    inject( SeoService ).set( { title: 'Claim your shop | TODD Market', description: 'Claim or remove your shop on TODD Market.', path: '/claim', noindex: true } );
+    inject( SeoService ).set( { title: 'Claim your shop | 16Ahead Store', description: 'Claim or remove your shop on 16Ahead Store.', path: '/claim', noindex: true } );
   }
 
   async ngOnInit (): Promise<void> {

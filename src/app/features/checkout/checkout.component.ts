@@ -69,7 +69,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   readonly referredStores = computed( () => this.bag.groups().filter( ( g ) => g.storeId !== this.store()?.id ).map( ( g ) => g.storeName ) );
 
   constructor () {
-    inject( SeoService ).set( { title: 'Checkout | TODD Market', description: 'Checkout', path: '/checkout', noindex: true } );
+    inject( SeoService ).set( { title: 'Checkout | 16Ahead Store', description: 'Checkout', path: '/checkout', noindex: true } );
   }
 
   async ngOnInit (): Promise<void> {

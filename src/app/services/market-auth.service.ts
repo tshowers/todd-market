@@ -107,7 +107,7 @@ export class MarketAuthService {
    */
   passkeysAvailable (): boolean {
     if ( !this.isBrowser || typeof window.PublicKeyCredential === 'undefined' ) return false;
-    return ['market.taliferro.tech', 'localhost'].includes( location.hostname );
+    return ['market.taliferro.tech', '16ahead.store', 'www.16ahead.store', 'localhost'].includes( location.hostname );
   }
 
   /** Signs in with a passkey saved on this device or synced to it. */

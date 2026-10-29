@@ -1,6 +1,6 @@
 @if (store(); as s) {
   <div class="shop tm-branded" [style]="style()">
-    @if (s.isSample) { <div class="sample">This is a sample store to show how TODD Market works. Checkout is turned off.</div> }
+    @if (s.isSample) { <div class="sample">This is a sample store to show how 16Ahead Store works. Checkout is turned off.</div> }
 
     @if (!inner()) {
       @if (homeData(); as h) {
@@ -98,7 +98,7 @@
             </details>
             @if (h.contactEmail) { <a [href]="'mailto:' + h.contactEmail">Contact</a> }
           </span>
-          <span class="foot__network">Part of <a [href]="platformUrl"><strong>TODD Market</strong></a>, independent stores that send each other customers</span>
+          <span class="foot__network">Part of <a [href]="platformUrl"><strong>16Ahead Store</strong></a>, independent stores that send each other customers</span>
         </footer>
       </main>
       }
@@ -250,9 +250,9 @@
             </div>
             } @else if (r.listingItems?.length) {
             <!-- Nobody in the network has it: shops from the Find crawl, on their own sites -->
-            <div class="source"><span class="tm-tag">Not on TODD Market yet · shop on their website</span></div>
+            <div class="source"><span class="tm-tag">Not on 16Ahead Store yet · shop on their website</span></div>
             <h2 class="heading">Not at {{ shortName() }}, but these shops may have it.</h2>
-            <p class="note">No store on TODD Market carries it yet. These shops sell it on their own websites, at their own prices.</p>
+            <p class="note">No store on 16Ahead Store carries it yet. These shops sell it on their own websites, at their own prices.</p>
             <div class="litems">
               @for (l of r.listingItems; track l.id) {
                 <div class="litem">
@@ -303,7 +303,7 @@
   @if (interestFor(); as l) { <tm-interest-dialog [domain]="l.storeDomain" [shopName]="l.storeName" [shopUrl]="l.storeUrl" [productUrl]="l.url" [productTitle]="l.title" (closed)="interestFor.set(null)" /> }
   <tm-bag-drawer [homeStoreId]="s.id" [storeSlug]="s.slug" />
 } @else if (notFound()) {
-  <main class="missing"><h1>That store isn't here.</h1><p>It may have closed, or the link is old.</p><a class="tm-btn tm-btn--primary" routerLink="/">Back to TODD Market</a></main>
+  <main class="missing"><h1>That store isn't here.</h1><p>It may have closed, or the link is old.</p><a class="tm-btn tm-btn--primary" routerLink="/">Back to 16Ahead Store</a></main>
 } @else {
   <p class="loading">Opening the store…</p>
 }

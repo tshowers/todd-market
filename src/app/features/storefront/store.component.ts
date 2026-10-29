@@ -97,7 +97,7 @@ export class StoreComponent implements OnInit {
       const { home, ...store } = await this.api.home( slug );
       this.store.set( store );
       this.homeData.set( home );
-      this.seo.set( { title: `${ store.name } | TODD Market`, description: store.heroLine || `Shop ${ store.name } on TODD Market.`, path: `/${ store.slug }` } );
+      this.seo.set( { title: `${ store.name } | 16Ahead Store`, description: store.heroLine || `Shop ${ store.name } on 16Ahead Store.`, path: `/${ store.slug }` } );
       this.seo.setJsonLd( 'store-jsonld', {
         '@context': 'https://schema.org', '@type': 'Store', name: store.name, url: `https://${ this.address() }`,
         hasOfferCatalog: { '@type': 'OfferCatalog', url: `https://market.taliferro.tech/feeds/${ store.slug }.json` },

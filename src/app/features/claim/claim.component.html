@@ -3,11 +3,11 @@
   @if (listing(); as l) {
     @if (removed()) {
       <h1>{{ l.name }} is removed.</h1>
-      <p class="lead">It won't appear on TODD Market again. If you change your mind, you can always start selling: <a routerLink="/sell">see how it works</a>.</p>
+      <p class="lead">It won't appear on 16Ahead Store again. If you change your mind, you can always start selling: <a routerLink="/sell">see how it works</a>.</p>
     } @else {
       <span class="tm-tag tm-tint-blue">Is this your business?</span>
       <h1>{{ l.name }}</h1>
-      <p class="lead">{{ l.domain }} is listed on TODD Market as a local shop that isn't here yet. Shoppers who find it are sent to your website.
+      <p class="lead">{{ l.domain }} is listed on 16Ahead Store as a local shop that isn't here yet. Shoppers who find it are sent to your website.
         @if (l.interestCount) { <strong>{{ l.interestCount }} shopper{{ l.interestCount === 1 ? '' : 's' }} asked to buy from you here.</strong> }</p>
 
       @if (!intent()) {

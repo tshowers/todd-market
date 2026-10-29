@@ -42,11 +42,11 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
         <h1>Payment methods</h1>
         @for (m of methods(); track m.id) {
           <div class="row addr"><span><strong>{{ m.brand | titlecase }} ending {{ m.last4 }}</strong><span>Expires {{ m.expMonth }}/{{ m.expYear }}</span></span><button type="button" class="tm-btn tm-btn--ghost" (click)="removeMethod(m.id)">Remove</button></div>
-        } @empty { <p class="muted">No saved cards. Cards you use at checkout are stored by Stripe, never by TODD Market.</p> }
+        } @empty { <p class="muted">No saved cards. Cards you use at checkout are stored by Stripe, never by 16Ahead Store.</p> }
       }
       @case ('security') {
         <h1>Sign-in &amp; security</h1>
-        <p class="muted">Passkeys let you sign in with Face ID, Touch ID or your device's screen lock instead of an email code. They work at every store on TODD Market.</p>
+        <p class="muted">Passkeys let you sign in with Face ID, Touch ID or your device's screen lock instead of an email code. They work at every store on 16Ahead Store.</p>
         @for (k of passkeys(); track k.id) {
           <div class="row addr"><span><strong>{{ k.name }}</strong><span>Added {{ k.createdAt ? (k.createdAt | date: 'MMM d, y') : 'just now' }}{{ k.lastUsedAt ? ' · last used ' + (k.lastUsedAt | date: 'MMM d') : '' }}</span></span><button type="button" class="tm-btn tm-btn--ghost" (click)="removePasskey(k.id)">Remove</button></div>
         } @empty { <p class="muted">No passkeys yet.</p> }
@@ -56,7 +56,7 @@ type Section = 'saved' | 'addresses' | 'payment-methods' | 'security';
           <p class="muted">Passkeys can be added on market.taliferro.tech in a browser that supports them.</p>
         }
         @if (notice()) { <p class="notice">{{ notice() }}</p> }
-        <div class="row addr"><span><strong>Sign-in methods</strong><span>Apple, Google, or a code sent to your email. All of them open the same TODD account.</span></span></div>
+        <div class="row addr"><span><strong>Sign-in methods</strong><span>Apple, Google, or a code sent to your email. All of them open the same 16Ahead account.</span></span></div>
       }
     }
     @if (error()) { <p class="tm-error">{{ error() }}</p> }`,

@@ -3,7 +3,7 @@ import { MenuAppConfig } from '@taliferro/ui/platform/universal-menu.model';
 /** TODD Market's part of the universal menu. */
 export const PLATFORM_MENU_CONFIG: MenuAppConfig = {
   app: 'market',
-  name: 'TODD Market',
+  name: '16Ahead Store',
   items: [
     { label: 'Home', icon: 'home', route: '/' },
     { label: 'My store', icon: 'grid', route: '/app', keywords: 'dashboard referrals onboarding merchant' },

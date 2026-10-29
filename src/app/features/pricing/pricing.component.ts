@@ -36,7 +36,7 @@ export class PricingComponent {
 
   readonly parts = [
     { tag: 'Per order', tint: 'blue', big: `${ PLATFORM_FEE_PCT }%`, body: 'No monthly plan. Your storefront, the AI that builds and updates it, the iPhone app, and listings shopping agents can read. Charged on the item total of each order, not tax or shipping.' },
-    { tag: 'Payments', tint: 'cyan', big: "Stripe's rate", body: "Card fees go to Stripe on each sale, at Stripe's standard rate for your account. TODD Market's fee is separate and applies only to orders." },
+    { tag: 'Payments', tint: 'cyan', big: "Stripe's rate", body: "Card fees go to Stripe on each sale, at Stripe's standard rate for your account. 16Ahead Store's fee is separate and applies only to orders." },
     { tag: 'Referrals', tint: 'green', big: `${ REFERRAL_RATE_RANGE.min }–${ REFERRAL_RATE_RANGE.max }%`, body: 'Paid only when a shopper another store sent you buys. You set the rate you pay and the minimum you accept.' },
   ];
 
@@ -47,7 +47,7 @@ export class PricingComponent {
     const earned = this.referralSales() * AVERAGE_REFERRAL_RATE;
     return {
       list: [
-        { label: `TODD Market fee (${ PLATFORM_FEE_PCT }%)`, value: '−' + money( fee ), good: false },
+        { label: `16Ahead Store fee (${ PLATFORM_FEE_PCT }%)`, value: '−' + money( fee ), good: false },
         { label: 'Card fees to Stripe (example)', value: '−' + money( cards ), good: false },
         { label: 'Referral earnings', value: '+' + money( earned ), good: true },
       ],
@@ -59,17 +59,17 @@ export class PricingComponent {
   readonly referralLabel = computed( () => '$' + this.referralSales().toLocaleString( 'en-US' ) );
 
   readonly faqs = [
-    { q: 'Is there a setup fee or a monthly plan?', a: `No. Import, build and review are free, and there's no monthly plan. TODD Market takes ${ PLATFORM_FEE_PCT }% of each order's item total, and only when you sell.` },
+    { q: 'Is there a setup fee or a monthly plan?', a: `No. Import, build and review are free, and there's no monthly plan. 16Ahead Store takes ${ PLATFORM_FEE_PCT }% of each order's item total, and only when you sell.` },
     { q: 'Who pays the referral commission?', a: "The store that makes the sale pays the store that sent the shopper, at the selling store's rate. It's settled through Stripe and paid out on the 1st of each month." },
     { q: 'What if a referred order is returned?', a: "Commission is held until the selling store's return window closes. If the item comes back before then, the commission is cancelled. After that, it's final." },
     { q: 'Can I leave the referral network?', a: 'Yes. You can stop sending shoppers, stop receiving them, or both, from the referral dashboard.' },
-    { q: 'Why do I need to verify my identity?', a: 'The law requires identity and business checks for anyone who takes card payments. Stripe runs them. TODD Market never stores your ID.' },
+    { q: 'Why do I need to verify my identity?', a: 'The law requires identity and business checks for anyone who takes card payments. Stripe runs them. 16Ahead Store never stores your ID.' },
   ];
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'TODD Market Pricing: a small fee per order, no monthly plan',
-      description: `No monthly plan. TODD Market takes ${ PLATFORM_FEE_PCT }% of each order, Stripe charges its card fees, and referrals pay only when a referred shopper buys.`,
+      title: '16Ahead Store Pricing: a small fee per order, no monthly plan',
+      description: `No monthly plan. 16Ahead Store takes ${ PLATFORM_FEE_PCT }% of each order, Stripe charges its card fees, and referrals pay only when a referred shopper buys.`,
       path: '/pricing',
     } );
   }

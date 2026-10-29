@@ -37,7 +37,7 @@ export class HelpComponent {
   readonly steps: HelpStep[] = [
     {
       n: '01', tint: 'blue', title: 'Import your catalog',
-      copy: 'Connect Shopify or Salesforce Commerce, or upload a CSV file, photos and price sheets. TODD Market reads products, sizes, colors, prices and stock.',
+      copy: 'Connect Shopify or Salesforce Commerce, or upload a CSV file, photos and price sheets. 16Ahead Store reads products, sizes, colors, prices and stock.',
       details: ['Most catalogs finish in about a minute.', 'Products without a price are flagged for you to fix or hide.'],
       action: 'Open import', route: '/app/onboarding/import',
     },
@@ -57,7 +57,7 @@ export class HelpComponent {
       n: '04', tint: 'violet', title: 'Get paid with Stripe',
       copy: 'Payments run through Stripe in two parts. The first part lets you take orders. The second part, an ID check and a bank account, unlocks payouts.',
       details: [
-        'The law requires identity and business checks for anyone who takes card payments. Stripe runs them, and TODD Market never stores your ID.',
+        'The law requires identity and business checks for anyone who takes card payments. Stripe runs them, and 16Ahead Store never stores your ID.',
         'Sales wait in your Stripe balance until payouts are unlocked.',
       ],
       action: 'Set up payments', route: '/app/onboarding/get-paid',
@@ -92,7 +92,7 @@ export class HelpComponent {
 
   constructor () {
     inject( SeoService ).set( {
-      title: 'TODD Market Help: From catalog to your first referral',
+      title: '16Ahead Store Help: From catalog to your first referral',
       description: 'Import your catalog, add your brand, review your store, get paid with Stripe, and control your referrals. Six steps, in the order most stores take them.',
       path: '/help',
     } );
