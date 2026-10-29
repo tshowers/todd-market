@@ -1,4 +1,4 @@
-# TODD Market (web)
+# 16Ahead Store (web)
 
 Independent stores import a catalog, AI builds a Find-themed storefront, and stores refer shoppers to each other for a commission. Design source: `design_handoff_todd_market_2/` (it supersedes `design_handoff_todd_market/`). Backend: `taliferrotech/todd-backend/functions/market/`.
 
@@ -10,7 +10,7 @@ Angular 19, standalone components, built to the Taliferro product standard (`tal
 |---|---|
 | `src/app/features/root`, `features/shop` | `/`: the shopper home. Search all stores, toggled with the Store directory (design Part 3). On a store's own domain, `/` shows that store |
 | `src/app/features/landing, about, help, pricing, ios` | Merchant landing at `/sell`, plus About, Help, Pricing, iOS. `/` and these are **prerendered** for SEO (`app.routes.server.ts`) |
-| `src/app/features/sign-in` | Apple, Google, or email link + 6-digit code (one TODD identity) |
+| `src/app/features/sign-in` | Apple, Google, or email link + 6-digit code (one 16Ahead identity) |
 | `src/app/features/merchant/onboarding/*` | Import → Brand → Build → Review → Get paid → Live |
 | `src/app/features/merchant/dashboard, orders, settings` | Referral dashboard (ledger, network map, controls), orders and returns, settings (store, returns, tax, shipping) |
 | `src/app/features/storefront` | `/:slug` (old `/s/:slug` links redirect): home, intent search, looks, referral variant C, bag |
@@ -79,7 +79,7 @@ Neither journey touches real Stripe. Before a big payments change, also do one r
 - **Checkout:** each store is the merchant of record. One checkout and one card entry, but a separate charge per store, so the copy says "1 checkout" instead of "1 payment". Confirm the wording with Todd.
 - **Pricing:** a per-order fee, no monthly plan. The Pricing page, FAQ and `/ios` line were reworded, and the numbers are still marked "Sample numbers".
 - **Store addresses:** `market.taliferro.tech/<slug>`. Named paths are reserved (`RESERVED_SLUGS` in the backend). A store can also connect **its own domain** (Settings → Store): the backend registers it on the `todd-market` Hosting site through the Firebase Hosting API and shows the merchant the DNS records. A Hosting site has a custom-domain limit, so past a few dozen stores this needs a load-balancer front door.
-- **Find:** Find's "Shop" tile opens Market, and Find results show a "From local stores on TODD Market" strip, which comes from `/api/network/search` with `lite: true` (no AI call).
+- **Find:** Find's "Shop" tile opens Market, and Find results show a "From local stores on 16Ahead Store" strip, which comes from `/api/network/search` with `lite: true` (no AI call).
 - **Merchant Orders screen:** there was no design for it, so it's plain and built from the Find tokens.
 - **Imports:** Salesforce Commerce and "Upload files" show a "contact us" note for now. Shopify (public catalog) and CSV import work.
 - **Exchanges:** an exchange is a refund plus the store emailing the shopper. Return labels are emailed by the store; there's no carrier API yet.
