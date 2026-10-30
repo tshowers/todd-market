@@ -8,6 +8,8 @@ export interface DirectoryStore {
   id: string; slug: string; name: string; category: string; city: string; location: string; description: string;
   logoUrl: string | null; tint: string | null; tintFg: string | null; tintDark: string | null; tintFgDark: string | null;
   features: string[]; isNew: boolean; isSample: boolean; customDomain: string | null;
+  /** Up to three product photos for the directory card's cover; empty until the store has some. */
+  products?: { id: string; title: string; imageUrl: string }[];
 }
 export interface NetworkItem extends PublicProduct {
   storeTint: string | null; storeTintFg: string | null; storeLogoUrl: string | null; isSample: boolean; reason: string; fulfilment: string;

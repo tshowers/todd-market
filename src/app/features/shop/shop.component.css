@@ -75,6 +75,8 @@
 .stores { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 16px; }
 .store { border-radius: 24px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
 .cover { position: relative; height: 130px; }
+.cpics { position: absolute; inset: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; }
+.cpics img { width: 100%; height: 100%; object-fit: cover; }
 .new { position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 999px; background: var(--bg); font-size: 12px; font-weight: 700; }
 .body { padding: 38px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .sname { font-size: 19px; }

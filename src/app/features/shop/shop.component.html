@@ -69,7 +69,7 @@
     <p class="lead">Every store here is independent and part of the 16Ahead Store network. Search them all at once, or browse one store at a time.</p>
   </div>
   <div class="chips"> @for (c of ['All'].concat(categories()); track c) { <button type="button" class="cat" [class.on]="category() === c" (click)="category.set(c); shown.set(24)">{{ c }}</button> } </div> @if (visibleStores().length) { <div class="stores"> @for (s of visibleStores(); track s.id) { <article class="store">
-      <div class="cover" [style.background]="s.tint || 'var(--surface2)'">@if (s.isNew) { <span class="new">New</span> }@if (s.isSample) { <span class="new">Sample store</span> } <span class="smark xl" [style.background]="s.tint" [style.color]="s.tintFg">@if (s.logoUrl) { <img [src]="s.logoUrl" alt=""> } @else { {{ initial(s.name) }} }</span></div>
+      <div class="cover" [style.background]="s.tint || 'var(--surface2)'">@if (s.products?.length) { <div class="cpics">@for (p of s.products; track p.id) { <img [src]="p.imageUrl" [alt]="p.title" loading="lazy"> }</div> }@if (s.isNew) { <span class="new">New</span> }@if (s.isSample) { <span class="new">Sample store</span> } <span class="smark xl" [style.background]="s.tint" [style.color]="s.tintFg">@if (s.logoUrl) { <img [src]="s.logoUrl" alt=""> } @else { {{ initial(s.name) }} }</span></div>
       <div class="body">
         <strong class="sname">{{ s.name }}</strong>
         <span class="meta">{{ s.category }}{{ s.city ? ' · ' + s.city : '' }}</span> @if (s.description) { <p>{{ s.description }}</p> } <div class="feats">@for (f of s.features; track f) { <span>{{ f }}</span> }</div>
